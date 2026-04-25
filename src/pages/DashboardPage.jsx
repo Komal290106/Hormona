@@ -373,16 +373,6 @@ export default function DashboardPage() {
         <p className="text-xs text-[#6B6B8A] mt-1">Keep tracking, stay consistent, and listen to your body.</p>
       </div>
 
-      {/* Log Data FAB */}
-      {!isDemoMode && (
-        <button
-          onClick={() => navigate('/log')}
-          className="fixed bottom-6 right-6 flex items-center gap-2 bg-[#7EC8A4] text-white font-medium px-5 py-3 rounded-full shadow-lg hover:bg-[#6ab890] hover:shadow-xl hover:scale-105 transition-all z-50"
-        >
-          <ClipboardList size={18} />
-          <span>Log Today's Data</span>
-        </button>
-      )}
     </div>
   )
 }

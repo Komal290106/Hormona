@@ -97,7 +97,7 @@ export default function ChatBot() {
         aria-label="Open PCOD Assistant"
       >
         <Bot size={20} style={{ color: '#7EC8A4' }} />
-        <span className="text-white text-sm font-semibold">Ask PCOD AI</span>
+        <span className="text-white text-sm font-semibold">Hormona AI</span>
       </button>
 
       {/* Chat panel */}
@@ -117,7 +117,7 @@ export default function ChatBot() {
               <Bot size={16} style={{ color: '#7EC8A4' }} />
             </div>
             <div>
-              <p className="text-white text-sm font-semibold leading-none">PCOD Assistant</p>
+              <p className="text-white text-sm font-semibold leading-none">Hormona AI</p>
               <p className="text-xs mt-0.5" style={{ color: '#7EC8A4' }}>Powered by Gemini AI</p>
             </div>
           </div>
