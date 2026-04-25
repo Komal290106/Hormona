@@ -12,6 +12,7 @@ import {
   Leaf,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import ChatBot from './ChatBot'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -204,6 +205,8 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+
+      <ChatBot />
     </div>
   )
 }
