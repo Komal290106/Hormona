@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../lib/api'
 import {
-  Activity, CircleAlert as AlertCircle, Bell, Calendar,
+  Activity, CircleAlert as AlertCircle, Calendar,
   ClipboardList, Droplet, Heart, ChartLine as LineChart,
   Lock, Moon, Shield, Sparkles, Target, Zap
 } from 'lucide-react'
@@ -97,16 +97,14 @@ export default function DashboardPage() {
           </h1>
           <p className="text-sm text-[#6B6B8A] mt-1">Here's your hormonal health overview</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="p-2 rounded-full hover:bg-white transition-colors">
-            <Bell size={20} className="text-[#6B6B8A]" />
-          </button>
-          <div className="w-9 h-9 rounded-full bg-[#7EC8A4] flex items-center justify-center">
-            <span className="text-white font-semibold text-sm">
-              {(displayName?.[0] || 'U').toUpperCase()}
-            </span>
-          </div>
-        </div>
+        <button
+          onClick={() => navigate('/profile')}
+          className="w-9 h-9 rounded-full bg-[#7EC8A4] flex items-center justify-center hover:bg-[#6ab890] transition-colors"
+        >
+          <span className="text-white font-semibold text-sm">
+            {(displayName?.[0] || 'U').toUpperCase()}
+          </span>
+        </button>
       </div>
 
       {/* Demo mode banner */}
