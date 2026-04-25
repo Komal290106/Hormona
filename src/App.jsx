@@ -10,14 +10,19 @@ import RiskSimulatorPage from './pages/RiskSimulatorPage'
 import InsightsPage from './pages/InsightsPage'
 import ProfilePage from './pages/ProfilePage'
 
+// Requires userId in localStorage (real user or demo user)
 function RequireAuth({ children }) {
   const userId = localStorage.getItem('hormonaUserId')
-  if (!userId) return <Navigate to="/login" replace />
+  const demoMode = localStorage.getItem('hormonaDemoMode') === 'true'
+  if (!userId && !demoMode) return <Navigate to="/login" replace />
   return children
 }
 
-function RequireUserId({ children }) {
+// Only allows access if coming from signup (userId set but onboarding not complete)
+function RequireOnboarding({ children }) {
   const userId = localStorage.getItem('hormonaUserId')
+  const demoMode = localStorage.getItem('hormonaDemoMode') === 'true'
+  if (demoMode) return <Navigate to="/dashboard" replace />
   if (!userId) return <Navigate to="/signup" replace />
   if (localStorage.getItem('hormonaOnboardingComplete') === 'true') {
     return <Navigate to="/dashboard" replace />
@@ -34,12 +39,12 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/onboarding" element={
-          <RequireUserId>
+          <RequireOnboarding>
             <OnboardingPage />
-          </RequireUserId>
+          </RequireOnboarding>
         } />
 
-        {/* Protected routes — need a userId in localStorage */}
+        {/* Protected routes — need userId or demoMode */}
         <Route element={
           <RequireAuth>
             <Layout />

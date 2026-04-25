@@ -1,63 +1,89 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../lib/api'
-import { Droplet, Moon, Activity, Smile, Award, Clock, CircleAlert as AlertCircle, ChevronLeft, ChevronRight, Flame, Zap, CircleCheck as CheckCircle2 } from 'lucide-react'
+import {
+  Droplet, Moon, Activity, Smile, Award, Clock,
+  CircleAlert as AlertCircle, ChevronLeft, ChevronRight,
+  Flame, Zap, CircleCheck as CheckCircle2, Info
+} from 'lucide-react'
 
 const moodOptions = [
-  { value: 'great', label: 'Very Happy', emoji: '😊', color: '#7EC8A4' },
-  { value: 'good', label: 'Happy', emoji: '🙂', color: '#A8D5BA' },
-  { value: 'okay', label: 'Neutral', emoji: '😐', color: '#F0C060' },
-  { value: 'low', label: 'Sad', emoji: '😔', color: '#EA9A98' },
-  { value: 'bad', label: 'Very Sad', emoji: '😢', color: '#D4847A' }
-]
-
-const flowOptions = [
-  { value: 'none', label: 'None' },
-  { value: 'light', label: 'Light' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'heavy', label: 'Heavy' }
+  { value: 'great', label: 'Very Happy', color: '#7EC8A4' },
+  { value: 'good', label: 'Happy', color: '#A8D5BA' },
+  { value: 'okay', label: 'Neutral', color: '#F0C060' },
+  { value: 'low', label: 'Sad', color: '#EA9A98' },
+  { value: 'bad', label: 'Very Sad', color: '#D4847A' },
 ]
 
 const sugarOptions = [
   { value: 'low', label: 'Low' },
   { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' }
+  { value: 'high', label: 'High' },
 ]
 
 const symptomsList = [
-  { id: 'acne', label: 'Acne', icon: '🔴' },
-  { id: 'bloating', label: 'Bloating', icon: '🎈' },
-  { id: 'fatigue', label: 'Fatigue', icon: '😴' },
-  { id: 'headache', label: 'Headache', icon: '🤕' },
-  { id: 'moodSwings', label: 'Mood Swings', icon: '🎭' },
-  { id: 'cramps', label: 'Cramps', icon: '⚡' },
-  { id: 'none', label: 'None', icon: '✓' }
+  { id: 'acne', label: 'Acne' },
+  { id: 'bloating', label: 'Bloating' },
+  { id: 'fatigue', label: 'Fatigue' },
+  { id: 'headache', label: 'Headache' },
+  { id: 'moodSwings', label: 'Mood Swings' },
+  { id: 'cramps', label: 'Cramps' },
+  { id: 'none', label: 'None' },
 ]
+
+// Demo placeholder — log page is disabled in demo mode
+function DemoBanner({ onSignUp }) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-[#1E1B5E]">Log Your Data</h1>
+        <p className="text-sm text-[#6B6B8A] mt-1">Track your daily habits and symptoms to get better insights.</p>
+      </div>
+      <div className="bg-white rounded-2xl border border-[#EEECF5] p-10 shadow-sm text-center">
+        <div className="w-14 h-14 rounded-2xl bg-[#E8F5EF] flex items-center justify-center mx-auto mb-4">
+          <Info size={26} className="text-[#7EC8A4]" />
+        </div>
+        <h2 className="text-lg font-bold text-[#1E1B5E] mb-2">Demo Mode</h2>
+        <p className="text-sm text-[#6B6B8A] max-w-sm mx-auto mb-6">
+          You're viewing Anaya's demo data. Create your own account to log your daily health data and get personalised insights.
+        </p>
+        <button
+          onClick={onSignUp}
+          className="bg-[#7EC8A4] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#6ab890] transition-all"
+        >
+          Create Free Account
+        </button>
+      </div>
+    </div>
+  )
+}
+
+const EMPTY_FORM = (userId) => ({
+  userId,
+  sleepHours: 7,
+  stressLevel: 5,
+  hydration: 6,
+  sugarIntake: '',
+  cycleStatus: '',
+  flow: 'none',
+  mood: '',
+  symptoms: [],
+  notes: '',
+})
 
 export default function LogDataPage() {
   const navigate = useNavigate()
+  const isDemoMode = localStorage.getItem('hormonaDemoMode') === 'true'
   const userId = localStorage.getItem('hormonaUserId')
 
-  // All defaults are neutral — nothing pre-selected for opinion-based fields
-  const [form, setForm] = useState({
-    userId,
-    sleepHours: 6.5,     // neutral midpoint on the 3–10 scale
-    stressLevel: 5,      // neutral midpoint on the 1–10 scale
-    hydration: 6,        // midpoint
-    sugarIntake: '',     // empty → no button highlighted until user taps
-    cycleStatus: '',     // empty → neither Yes nor No pre-selected
-    flow: 'none',
-    mood: '',            // empty → no mood emoji highlighted
-    symptoms: [],
-    notes: ''
-  })
+  const [form, setForm] = useState(EMPTY_FORM(userId))
   const [selectedSymptoms, setSelectedSymptoms] = useState([])
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [streak, setStreak] = useState(0)           // real streak, default 0
+  const [streak, setStreak] = useState(0)
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [loggedDates, setLoggedDates] = useState([]) // real dates from API
+  const [loggedDates, setLoggedDates] = useState([])
 
   const setValue = (key, val) => setForm(f => ({ ...f, [key]: val }))
 
@@ -77,7 +103,6 @@ export default function LogDataPage() {
     })
   }
 
-  // Validate before submitting — mood and sugarIntake must be chosen
   const validate = () => {
     if (!form.mood) return 'Please select your mood for today.'
     if (!form.sugarIntake) return 'Please select your sugar intake level.'
@@ -93,7 +118,7 @@ export default function LogDataPage() {
       setLoading(true)
       await api.post('/logs', {
         ...form,
-        sugarIntake: form.sugarIntake || 'medium',
+        sugarIntake: form.sugarIntake,
         cycleStatus: form.cycleStatus || 'none',
       })
       setSaved(true)
@@ -107,6 +132,12 @@ export default function LogDataPage() {
     }
   }
 
+  const handleClear = () => {
+    setForm(EMPTY_FORM(userId))
+    setSelectedSymptoms([])
+    setSubmitError('')
+  }
+
   const fetchLoggedDates = async () => {
     if (!userId) return
     try {
@@ -114,7 +145,6 @@ export default function LogDataPage() {
       const dates = res.data.map(log => new Date(log.date).toDateString())
       setLoggedDates(dates)
 
-      // Calculate real streak from consecutive days ending today
       const dateSet = new Set(dates)
       const today = new Date()
       let s = 0
@@ -126,24 +156,27 @@ export default function LogDataPage() {
       }
       setStreak(s)
     } catch {
-      // API failed — show empty calendar, streak stays 0
       setLoggedDates([])
       setStreak(0)
     }
   }
 
   useEffect(() => {
-    fetchLoggedDates()
-  }, [userId])
+    if (!isDemoMode) fetchLoggedDates()
+  }, [userId, isDemoMode])
+
+  if (isDemoMode) {
+    return <DemoBanner onSignUp={() => navigate('/signup')} />
+  }
 
   const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate()
   const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay()
 
   const changeMonth = (delta) => {
     setCurrentMonth(prev => {
-      const newDate = new Date(prev)
-      newDate.setMonth(prev.getMonth() + delta)
-      return newDate
+      const d = new Date(prev)
+      d.setMonth(prev.getMonth() + delta)
+      return d
     })
   }
 
@@ -165,10 +198,8 @@ export default function LogDataPage() {
       const isToday = dateString === today
       days.push(
         <div key={d} className="flex flex-col items-center">
-          <div className={`
-            w-8 h-8 flex items-center justify-center text-sm rounded-full
-            ${isToday ? 'bg-[#7EC8A4] text-white font-semibold' : 'text-[#1E1B5E]'}
-          `}>
+          <div className={`w-8 h-8 flex items-center justify-center text-sm rounded-full
+            ${isToday ? 'bg-[#7EC8A4] text-white font-semibold' : 'text-[#1E1B5E]'}`}>
             {d}
           </div>
           {isLogged && <div className="w-1 h-1 rounded-full bg-[#7EC8A4] mt-0.5" />}
@@ -179,22 +210,20 @@ export default function LogDataPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div>
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#1E1B5E]">Log Your Data</h1>
         <p className="text-sm text-[#6B6B8A] mt-1">Track your daily habits and symptoms to get better insights.</p>
       </div>
 
-      {/* Success banner */}
       {saved && (
         <div className="bg-[#E8F5EF] text-[#1E1B5E] text-sm px-4 py-3 rounded-xl mb-6 font-medium flex items-center gap-2">
           <CheckCircle2 size={16} className="text-[#7EC8A4]" />
-          Today's log saved successfully! Your insights will update shortly.
+          Today's log saved! Your insights will update shortly.
         </div>
       )}
 
-      {/* Submit error */}
       {submitError && (
         <div className="bg-[#FDECEA] text-[#E8A598] text-sm px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
           <AlertCircle size={16} />
@@ -203,9 +232,9 @@ export default function LogDataPage() {
       )}
 
       <div className="grid lg:grid-cols-3 gap-5">
-        {/* Main Form - Left Column (2/3 width) */}
+        {/* Main Form */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Period Information Row */}
+          {/* 1. Period Information */}
           <div className="bg-white rounded-xl border border-[#EEECF5] p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-5 h-5 rounded-full bg-[#E8F5EF] flex items-center justify-center text-xs font-semibold text-[#7EC8A4]">1</div>
@@ -215,42 +244,35 @@ export default function LogDataPage() {
             <div className="flex items-center gap-6 mb-3">
               <p className="text-sm text-[#6B6B8A]">Are you on your period today?</p>
               <div className="flex gap-3">
-                <button
-                  onClick={() => setValue('cycleStatus', 'period')}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${form.cycleStatus === 'period'
-                    ? 'bg-[#7EC8A4] text-white'
-                    : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A]'
-                    }`}
-                >
-                  Yes
-                </button>
-                <button
-                  onClick={() => setValue('cycleStatus', 'none')}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${form.cycleStatus === 'none'
-                    ? 'bg-[#7EC8A4] text-white'
-                    : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A]'
-                    }`}
-                >
-                  No
-                </button>
+                {[{ val: 'period', label: 'Yes' }, { val: 'none', label: 'No' }].map(({ val, label }) => (
+                  <button
+                    key={val}
+                    onClick={() => setValue('cycleStatus', val)}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${form.cycleStatus === val
+                      ? 'bg-[#7EC8A4] text-white'
+                      : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50'
+                      }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
-            {/* No pre-selection — both buttons appear unselected on first load */}
 
             {form.cycleStatus === 'period' && (
               <div className="flex items-center gap-4">
                 <p className="text-sm text-[#6B6B8A]">Flow Intensity</p>
                 <div className="flex gap-2">
-                  {flowOptions.filter(f => f.value !== 'none').map(option => (
+                  {['light', 'medium', 'heavy'].map(v => (
                     <button
-                      key={option.value}
-                      onClick={() => setValue('flow', option.value)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${form.flow === option.value
+                      key={v}
+                      onClick={() => setValue('flow', v)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${form.flow === v
                         ? 'bg-[#EA9A98] text-white'
                         : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A]'
                         }`}
                     >
-                      {option.label}
+                      {v}
                     </button>
                   ))}
                 </div>
@@ -258,7 +280,7 @@ export default function LogDataPage() {
             )}
           </div>
 
-          {/* Lifestyle Data */}
+          {/* 2. Lifestyle Data */}
           <div className="bg-white rounded-xl border border-[#EEECF5] p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-5 h-5 rounded-full bg-[#E8F5EF] flex items-center justify-center text-xs font-semibold text-[#7EC8A4]">2</div>
@@ -266,93 +288,77 @@ export default function LogDataPage() {
             </div>
 
             <div className="grid grid-cols-3 gap-4">
-              {/* Sleep */}
               <div>
                 <label className="block text-xs font-medium text-[#1E1B5E] mb-1">
-                  Sleep Duration — <span className="text-[#7EC8A4] font-semibold">{form.sleepHours} hrs</span>
+                  Sleep — <span className="text-[#7EC8A4] font-semibold">{form.sleepHours} hrs</span>
                 </label>
                 <input
-                  type="range"
-                  min="3"
-                  max="10"
-                  step="0.5"
+                  type="range" min="3" max="10" step="0.5"
                   value={form.sleepHours}
                   onChange={e => setValue('sleepHours', parseFloat(e.target.value))}
                   className="w-full h-1.5 rounded-lg appearance-none bg-[#EEECF5]"
                   style={{ accentColor: '#7EC8A4' }}
                 />
                 <div className="flex justify-between text-[10px] text-[#6B6B8A] mt-0.5">
-                  <span>3 hrs</span>
-                  <span>10 hrs</span>
+                  <span>3 hrs</span><span>10 hrs</span>
                 </div>
               </div>
 
-              {/* Stress */}
               <div>
                 <label className="block text-xs font-medium text-[#1E1B5E] mb-1">
-                  Stress Level — <span className="text-[#EA9A98] font-semibold">{form.stressLevel} / 10</span>
+                  Stress — <span className="text-[#EA9A98] font-semibold">{form.stressLevel} / 10</span>
                 </label>
                 <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  step="1"
+                  type="range" min="1" max="10" step="1"
                   value={form.stressLevel}
                   onChange={e => setValue('stressLevel', parseInt(e.target.value))}
                   className="w-full h-1.5 rounded-lg appearance-none bg-[#EEECF5]"
                   style={{ accentColor: '#EA9A98' }}
                 />
                 <div className="flex justify-between text-[10px] text-[#6B6B8A] mt-0.5">
-                  <span>Low</span>
-                  <span>High</span>
+                  <span>Low</span><span>High</span>
                 </div>
               </div>
 
-              {/* Water Intake */}
               <div>
                 <label className="block text-xs font-medium text-[#1E1B5E] mb-1">
-                  Water Intake — <span className="text-[#7EC8A4] font-semibold">{form.hydration} glasses</span>
+                  Water — <span className="text-[#7EC8A4] font-semibold">{form.hydration} glasses</span>
                 </label>
                 <input
-                  type="range"
-                  min="0"
-                  max="12"
-                  step="1"
+                  type="range" min="0" max="12" step="1"
                   value={form.hydration}
                   onChange={e => setValue('hydration', parseInt(e.target.value))}
                   className="w-full h-1.5 rounded-lg appearance-none bg-[#EEECF5]"
                   style={{ accentColor: '#7EC8A4' }}
                 />
                 <div className="flex justify-between text-[10px] text-[#6B6B8A] mt-0.5">
-                  <span>0</span>
-                  <span>12+</span>
+                  <span>0</span><span>12+</span>
                 </div>
               </div>
             </div>
 
-            {/* Sugar Intake — required, starts unselected */}
             <div className="mt-3">
               <label className="block text-xs font-medium text-[#1E1B5E] mb-1">
                 Sugar Intake <span className="text-[#EA9A98]">*</span>
               </label>
               <div className="flex gap-2">
-                {sugarOptions.map(option => (
+                {sugarOptions.map(({ value, label }) => (
                   <button
-                    key={option.value}
-                    onClick={() => setValue('sugarIntake', option.value)}
-                    className={`flex-1 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${form.sugarIntake === option.value
+                    key={value}
+                    onClick={() => setValue('sugarIntake', value)}
+                    className={`flex-1 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${form.sugarIntake === value
                       ? 'bg-[#1E1B5E] text-white'
                       : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A] hover:border-[#1E1B5E]/40'
                       }`}
                   >
-                    {option.label}
+                    {label}
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Symptoms */}
+          {/* 3. Symptoms */}
           <div className="bg-white rounded-xl border border-[#EEECF5] p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-5 h-5 rounded-full bg-[#E8F5EF] flex items-center justify-center text-xs font-semibold text-[#7EC8A4]">3</div>
@@ -368,16 +374,14 @@ export default function LogDataPage() {
                     : 'border border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]'
                     }`}
                 >
-                  <span className="text-sm">{symptom.icon}</span>
-                  <span>{symptom.label}</span>
+                  {symptom.label}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Mood & Notes */}
+          {/* 4. Mood & Notes */}
           <div className="grid grid-cols-2 gap-4">
-            {/* Mood — required, starts empty (nothing highlighted) */}
             <div className="bg-white rounded-xl border border-[#EEECF5] p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-5 h-5 rounded-full bg-[#E8F5EF] flex items-center justify-center text-xs font-semibold text-[#7EC8A4]">4</div>
@@ -395,14 +399,14 @@ export default function LogDataPage() {
                       : 'border border-[#EEECF5] hover:border-[#7EC8A4]'
                       }`}
                   >
-                    <span className="text-lg">{option.emoji}</span>
-                    <span className="text-[10px] text-[#6B6B8A]">{option.label.split(' ')[0]}</span>
+                    <span className="text-sm font-medium" style={{ color: option.color }}>
+                      {option.label.split(' ')[0]}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Notes */}
             <div className="bg-white rounded-xl border border-[#EEECF5] p-4 shadow-sm">
               <h2 className="font-semibold text-[#1E1B5E] text-sm mb-1">Additional Notes</h2>
               <textarea
@@ -410,7 +414,8 @@ export default function LogDataPage() {
                 onChange={e => setValue('notes', e.target.value)}
                 placeholder="How are you feeling today?"
                 className="w-full p-2 rounded-lg border border-[#EEECF5] text-sm text-[#1E1B5E] placeholder:text-[#6B6B8A] focus:outline-none focus:border-[#7EC8A4] resize-none"
-                rows={2}
+                rows={3}
+                maxLength={500}
               />
             </div>
           </div>
@@ -425,22 +430,7 @@ export default function LogDataPage() {
               {loading ? 'Saving...' : 'Save Log'}
             </button>
             <button
-              onClick={() => {
-                setForm({
-                  userId,
-                  sleepHours: 6.5,
-                  stressLevel: 5,
-                  hydration: 6,
-                  sugarIntake: '',
-                  cycleStatus: '',
-                  flow: 'none',
-                  mood: '',
-                  symptoms: [],
-                  notes: ''
-                })
-                setSelectedSymptoms([])
-                setSubmitError('')
-              }}
+              onClick={handleClear}
               className="px-6 py-2.5 rounded-xl border border-[#EEECF5] text-[#6B6B8A] font-medium hover:bg-[#FAF8F5] transition-all text-sm"
             >
               Clear
@@ -475,27 +465,28 @@ export default function LogDataPage() {
             </div>
           </div>
 
-          {/* Logging Streak — real data, no fakes */}
-          <div className="bg-gradient-to-r from-[#EDE9F8] to-[#E8F5EF] rounded-xl p-4">
+          {/* Streak */}
+          <div className="bg-[#EEF7F2] rounded-xl p-4 border border-[#C8E9D8]">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Award size={18} className="text-[#7EC8A4]" />
                 <h3 className="font-semibold text-[#1E1B5E] text-sm">Logging Streak</h3>
               </div>
               <span className="text-xl font-bold text-[#7EC8A4]">
-                {streak > 0 ? `${streak} day${streak > 1 ? 's' : ''}` : '—'}
+                {streak > 0 ? `${streak}d` : '—'}
               </span>
             </div>
             {streak > 0 ? (
               <>
                 <p className="text-xs text-[#1E1B5E] font-medium">
-                  {streak >= 7 ? 'Amazing consistency! Keep it up 🔥' : 'Great job! Keep logging daily.'}
+                  {streak >= 7 ? 'Excellent consistency!' : 'Great job! Keep logging daily.'}
                 </p>
                 <div className="mt-2 flex items-center gap-1">
                   {[...Array(7)].map((_, i) => (
                     <div
                       key={i}
-                      className={`flex-1 h-1 rounded-full ${i < streak ? 'bg-[#7EC8A4]' : 'bg-[#EEECF5]'}`}
+                      className="flex-1 h-1 rounded-full"
+                      style={{ backgroundColor: i < Math.min(streak, 7) ? '#7EC8A4' : '#EEECF5' }}
                     />
                   ))}
                 </div>
@@ -505,39 +496,31 @@ export default function LogDataPage() {
             )}
           </div>
 
-          {/* Today's Summary */}
+          {/* Today's Preview */}
           <div className="bg-white rounded-xl border border-[#EEECF5] p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <Clock size={16} className="text-[#7EC8A4]" />
               <h3 className="font-semibold text-[#1E1B5E] text-sm">Today's Entry Preview</h3>
             </div>
             <div className="space-y-1.5 text-sm">
-              <div className="flex justify-between">
-                <span className="text-[#6B6B8A] text-xs flex items-center gap-1"><Moon size={12} /> Sleep</span>
-                <span className="text-[#1E1B5E] text-xs font-medium">{form.sleepHours} hrs</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B6B8A] text-xs flex items-center gap-1"><Flame size={12} /> Stress</span>
-                <span className="text-[#1E1B5E] text-xs font-medium">{form.stressLevel} / 10</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B6B8A] text-xs flex items-center gap-1"><Droplet size={12} /> Water</span>
-                <span className="text-[#1E1B5E] text-xs font-medium">{form.hydration} glasses</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B6B8A] text-xs flex items-center gap-1"><Activity size={12} /> Symptoms</span>
-                <span className="text-[#1E1B5E] text-xs font-medium">{selectedSymptoms.filter(s => s !== 'none').length} logged</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B6B8A] text-xs flex items-center gap-1"><Smile size={12} /> Mood</span>
-                <span className="text-[#1E1B5E] text-xs font-medium capitalize">
-                  {form.mood ? form.mood : <span className="text-[#EEECF5] italic">not set</span>}
-                </span>
-              </div>
+              {[
+                { icon: Moon, label: 'Sleep', value: `${form.sleepHours} hrs` },
+                { icon: Flame, label: 'Stress', value: `${form.stressLevel} / 10` },
+                { icon: Droplet, label: 'Water', value: `${form.hydration} glasses` },
+                { icon: Activity, label: 'Symptoms', value: `${selectedSymptoms.filter(s => s !== 'none').length} logged` },
+                { icon: Smile, label: 'Mood', value: form.mood || '—' },
+              ].map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex justify-between">
+                  <span className="text-[#6B6B8A] text-xs flex items-center gap-1">
+                    <Icon size={12} /> {label}
+                  </span>
+                  <span className="text-[#1E1B5E] text-xs font-medium capitalize">{value}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Tip Card */}
+          {/* Tip */}
           <div className="bg-[#EDE9F8] rounded-xl p-4">
             <div className="flex items-start gap-2">
               <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center flex-shrink-0">

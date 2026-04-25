@@ -1,28 +1,63 @@
 import { useState, useEffect } from 'react'
-import { Activity, TrendingUp, TrendingDown, Heart, Moon, Flame, Droplet, Brain, Zap, Calendar, Award, CircleAlert as AlertCircle, Sparkles, Target, ChartLine as LineChart, Clock } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import {
+  Activity, TrendingUp, TrendingDown, Heart, Moon, Flame,
+  Droplet, Brain, Zap, Calendar, Award, CircleAlert as AlertCircle,
+  Sparkles, Target, ChartLine as LineChart, Clock
+} from 'lucide-react'
 import api from '../lib/api'
 
+// Static demo insights for demo mode
+const DEMO_INSIGHTS = {
+  hasData: true,
+  healthScore: { score: 72, label: 'Good' },
+  cycleRegularity: { score: 78, label: 'Regular' },
+  pcodRisk: { score: 22, label: 'Low' },
+  loggedDays: 14,
+  currentStreak: 7,
+  trendData: [
+    { week: 'Week 1', sleep: 7.2, stress: 5, energy: 6 },
+    { week: 'Week 2', sleep: 7.5, stress: 4, energy: 7 },
+    { week: 'Week 3', sleep: 6.8, stress: 6, energy: 5 },
+    { week: 'Week 4', sleep: 7.8, stress: 3, energy: 8 },
+  ],
+  positivePatterns: [
+    { icon: 'moon', title: 'Better Sleep, Better You', description: 'You averaged 7.5 hrs — above the 7-hr threshold for better hormonal health.' },
+    { icon: 'stress', title: 'Low Stress Days Are Powerful', description: 'On low stress days, your cycle stability improved noticeably.' },
+    { icon: 'droplet', title: 'Hydration Matters', description: 'Days with 7+ glasses of water showed reduced bloating.' },
+  ],
+  cycleHighlights: { longest: 32, shortest: 27, average: 29 },
+  avgSleep: 7.3,
+  avgStress: 4.5,
+  avgHydration: 7,
+}
+
+function renderIcon(iconName, size = 14, color = '#7EC8A4') {
+  if (iconName === 'moon') return <Moon size={size} style={{ color }} />
+  if (iconName === 'stress') return <Flame size={size} style={{ color }} />
+  if (iconName === 'droplet') return <Droplet size={size} style={{ color }} />
+  return <Zap size={size} style={{ color }} />
+}
+
 export default function InsightsPage() {
+  const navigate = useNavigate()
+  const isDemoMode = localStorage.getItem('hormonaDemoMode') === 'true'
   const userId = localStorage.getItem('hormonaUserId')
-  const [insights, setInsights] = useState(null)
-  const [loading, setLoading] = useState(true)
+
+  const [insights, setInsights] = useState(isDemoMode ? DEMO_INSIGHTS : null)
+  const [loading, setLoading] = useState(!isDemoMode)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!userId) return
+    if (isDemoMode) return
+
+    if (!userId) { navigate('/login'); return }
 
     api.get(`/logs/${userId}/insights`)
       .then(res => setInsights(res.data))
       .catch(err => setError(err.response?.data?.error || 'Failed to load insights'))
       .finally(() => setLoading(false))
-  }, [userId])
-
-  const renderIcon = (iconName, size = 14, color = '#7EC8A4') => {
-    if (iconName === 'moon') return <Moon size={size} style={{ color }} />
-    if (iconName === 'stress') return <Flame size={size} style={{ color }} />
-    if (iconName === 'droplet') return <Droplet size={size} style={{ color }} />
-    return <Zap size={size} style={{ color }} />
-  }
+  }, [userId, isDemoMode, navigate])
 
   if (loading) {
     return (
@@ -37,41 +72,60 @@ export default function InsightsPage() {
       <div className="flex items-center justify-center h-64 text-center">
         <div>
           <AlertCircle size={32} className="text-[#E8A598] mx-auto mb-3" />
-          <p className="text-sm text-[#6B6B8A]">{error}</p>
+          <p className="text-sm text-[#6B6B8A] mb-3">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm bg-[#7EC8A4] text-white px-4 py-2 rounded-xl hover:bg-[#6ab890]"
+          >
+            Retry
+          </button>
         </div>
       </div>
     )
   }
 
-  // No logs yet
   if (!insights?.hasData) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-[#1E1B5E]">Insights</h1>
+          <h1 className="text-2xl font-bold text-[#1E1B5E]">Insights</h1>
           <p className="text-sm text-[#6B6B8A] mt-1">Your health data analyzed for meaningful patterns</p>
         </div>
         <div className="bg-white rounded-2xl border border-[#EEECF5] p-12 shadow-sm text-center">
           <Activity size={32} className="text-[#7EC8A4] mx-auto mb-4" />
           <h2 className="text-lg font-bold text-[#1E1B5E] mb-2">No insights yet</h2>
-          <p className="text-sm text-[#6B6B8A] max-w-sm mx-auto">
+          <p className="text-sm text-[#6B6B8A] max-w-sm mx-auto mb-5">
             Insights unlock after a few days of logging. Head to Log Data and record today's sleep, stress, and mood.
           </p>
+          <button
+            onClick={() => navigate('/log')}
+            className="bg-[#7EC8A4] text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-[#6ab890] transition-all"
+          >
+            Log Today's Data
+          </button>
         </div>
       </div>
     )
   }
 
   const d = insights
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-[#1E1B5E]">Insights</h1>
+        <h1 className="text-2xl font-bold text-[#1E1B5E]">Insights</h1>
         <p className="text-sm text-[#6B6B8A] mt-1">Your health data analyzed for meaningful patterns</p>
       </div>
 
+      {isDemoMode && (
+        <div className="bg-[#E8F5EF] border border-[#C8E9D8] rounded-xl px-4 py-3 flex items-center gap-2 text-sm text-[#1E1B5E]">
+          <Sparkles size={15} className="text-[#7EC8A4]" />
+          Demo data shown — create an account to track your own insights.
+        </div>
+      )}
+
       {/* Stats row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Hormonal Health Score', value: `${d.healthScore.score}`, suffix: '/100', badge: d.healthScore.label, icon: Activity, dir: 'up' },
           { label: 'Cycle Regularity', value: `${d.cycleRegularity.score}`, suffix: '%', badge: d.cycleRegularity.label, icon: Calendar, dir: 'up' },
@@ -119,9 +173,9 @@ export default function InsightsPage() {
               {d.trendData.map((item, idx) => (
                 <div key={idx} className="flex-1 flex flex-col items-center gap-1 group">
                   <div className="w-full flex justify-center gap-1">
-                    <div className="w-2 rounded-t opacity-70 group-hover:opacity-100" style={{ height: `${(item.sleep / 10) * 120}px`, backgroundColor: '#7EC8A4' }} />
-                    <div className="w-2 rounded-t opacity-70 group-hover:opacity-100" style={{ height: `${(item.stress / 10) * 120}px`, backgroundColor: '#EA9A98' }} />
-                    <div className="w-2 rounded-t opacity-70 group-hover:opacity-100" style={{ height: `${(item.energy / 10) * 120}px`, backgroundColor: '#F0C060' }} />
+                    <div className="w-2 rounded-t opacity-70 group-hover:opacity-100 transition-opacity" style={{ height: `${(item.sleep / 10) * 120}px`, backgroundColor: '#7EC8A4' }} />
+                    <div className="w-2 rounded-t opacity-70 group-hover:opacity-100 transition-opacity" style={{ height: `${(item.stress / 10) * 120}px`, backgroundColor: '#EA9A98' }} />
+                    <div className="w-2 rounded-t opacity-70 group-hover:opacity-100 transition-opacity" style={{ height: `${((item.energy || 5) / 10) * 120}px`, backgroundColor: '#F0C060' }} />
                   </div>
                   <span className="text-[10px] text-[#6B6B8A]">{item.week?.split(' ')[1] || item.week}</span>
                 </div>
@@ -136,16 +190,16 @@ export default function InsightsPage() {
       )}
 
       {/* Body message */}
-      <div className="bg-gradient-to-r from-[#EDE9F8] to-[#E8F5EF] rounded-2xl p-5">
+      <div className="bg-[#EEF7F2] rounded-2xl p-5 border border-[#C8E9D8]">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0">
             <Heart size={20} className="text-[#7EC8A4]" />
           </div>
           <div>
             <h2 className="font-semibold text-[#1E1B5E] text-lg">What Your Body is Telling You</h2>
             <p className="text-sm text-[#6B6B8A] mt-1 leading-relaxed">
               {d.healthScore.score >= 65
-                ? 'Your body shows signs of good balance! Keep focusing on sleep, hydration and stress management.'
+                ? 'Your body shows signs of good balance! Continue focusing on sleep, hydration and stress management.'
                 : 'Keep logging consistently — your score improves as you build healthier habits.'}
             </p>
           </div>
@@ -209,7 +263,7 @@ export default function InsightsPage() {
             </div>
           ))}
           {d.avgSleep >= 7 && d.avgStress <= 5 && d.avgHydration >= 6 && (
-            <div className="p-4 rounded-xl border border-[#7EC8A4] bg-[#E8F5EF] col-span-full text-center">
+            <div className="p-4 rounded-xl border border-[#7EC8A4] bg-[#E8F5EF] md:col-span-3 text-center">
               <p className="text-sm font-semibold text-[#1E1B5E]">You're doing great across all key metrics! Keep it up.</p>
             </div>
           )}

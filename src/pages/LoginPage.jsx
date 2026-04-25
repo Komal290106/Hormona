@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Heart, Eye, EyeOff, ArrowRight, Sparkles } from 'lucide-react'
+import { Heart, Eye, EyeOff, ArrowRight, Sparkles, CircleCheck as CheckCircle } from 'lucide-react'
 import api from '../lib/api'
 
 export default function LoginPage() {
@@ -22,15 +22,17 @@ export default function LoginPage() {
       setLoading(true)
       setError('')
       const res = await api.post('/users/login', form)
+      localStorage.removeItem('hormonaDemoMode')
       localStorage.setItem('hormonaUserId', res.data._id)
       localStorage.setItem('hormonaUserName', res.data.name)
 
       if (res.data.onboardingComplete) {
         localStorage.setItem('hormonaOnboardingComplete', 'true')
-        navigate('/dashboard')
       } else {
-        navigate('/onboarding')
+        localStorage.removeItem('hormonaOnboardingComplete')
       }
+      // Always go to dashboard — login users don't re-do onboarding
+      navigate('/dashboard')
     } catch (err) {
       const msg = err.response?.data?.message
       setError(msg || 'Invalid email or password. Please try again.')
@@ -39,29 +41,26 @@ export default function LoginPage() {
     }
   }
 
-  // Demo shortcut — fetches real Anaya from backend
-  const handleDemoLogin = async () => {
-    try {
-      const res = await api.get('/users/demo')
-      localStorage.setItem('hormonaUserId', res.data._id)
-      localStorage.setItem('hormonaUserName', res.data.name)
-      if (res.data.onboardingComplete) {
-        localStorage.setItem('hormonaOnboardingComplete', 'true')
-      }
-      navigate('/dashboard')
-    } catch {
-      setError('Could not connect to the server. Please check your connection and try again.')
-    }
+  const handleDemoLogin = () => {
+    // Static demo — no backend
+    localStorage.setItem('hormonaDemoMode', 'true')
+    localStorage.setItem('hormonaUserName', 'Anaya')
+    localStorage.removeItem('hormonaUserId')
+    localStorage.removeItem('hormonaOnboardingComplete')
+    navigate('/dashboard')
   }
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] flex">
-      {/* Left decorative panel */}
+      {/* Left panel */}
       <div
         className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12"
         style={{ backgroundColor: '#1E1B5E' }}
       >
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => navigate('/')}
+        >
           <Heart size={28} style={{ color: '#7EC8A4' }} fill="#7EC8A4" />
           <span className="text-white font-bold text-2xl tracking-tight">HORMONA</span>
         </div>
@@ -72,25 +71,25 @@ export default function LoginPage() {
             <span style={{ color: '#7EC8A4' }}>understood.</span>
           </h2>
           <p className="text-white/60 text-base leading-relaxed">
-            Track your cycle, log daily habits, and get AI-powered insights to understand your body's unique patterns.
+            Track your cycle, log daily habits, and get insights to understand your body's unique patterns.
           </p>
 
           <div className="mt-10 space-y-4">
             {[
-              { icon: '🌿', text: 'Personalized PCOD risk analysis' },
-              { icon: '📊', text: 'Smart lifestyle tracking & trends' },
-              { icon: '🔮', text: 'Predictive cycle intelligence' },
-            ].map((item) => (
-              <div key={item.text} className="flex items-center gap-3">
-                <span className="text-xl">{item.icon}</span>
-                <span className="text-white/80 text-sm">{item.text}</span>
+              'Personalized PCOD risk analysis',
+              'Smart lifestyle tracking & trends',
+              'Predictive cycle intelligence',
+            ].map((text) => (
+              <div key={text} className="flex items-center gap-3">
+                <CheckCircle size={18} style={{ color: '#7EC8A4' }} />
+                <span className="text-white/80 text-sm">{text}</span>
               </div>
             ))}
           </div>
         </div>
 
         <p className="text-white/30 text-xs">
-          Your data is encrypted and never shared. Privacy first, always.
+          Your data is encrypted and never shared.
         </p>
       </div>
 
@@ -98,7 +97,10 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
-          <div className="flex items-center gap-2 mb-10 lg:hidden">
+          <div
+            className="flex items-center gap-2 mb-10 lg:hidden cursor-pointer"
+            onClick={() => navigate('/')}
+          >
             <Heart size={24} style={{ color: '#7EC8A4' }} fill="#7EC8A4" />
             <span className="text-[#1E1B5E] font-bold text-xl tracking-tight">HORMONA</span>
           </div>
@@ -133,9 +135,6 @@ export default function LoginPage() {
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="block text-sm font-medium text-[#1A1A2E]">Password</label>
-                <button type="button" className="text-xs text-[#7EC8A4] hover:underline">
-                  Forgot password?
-                </button>
               </div>
               <div className="relative">
                 <input
@@ -167,7 +166,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Demo divider */}
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-[#EEECF5]" />
             <span className="text-xs text-[#6B6B8A]">or</span>
@@ -176,7 +174,7 @@ export default function LoginPage() {
 
           <button
             onClick={handleDemoLogin}
-            className="w-full flex items-center justify-center gap-2 border border-[#EEECF5] bg-white text-[#1E1B5E] font-medium py-3 rounded-xl hover:bg-[#F0EEF8] transition-colors text-sm"
+            className="w-full flex items-center justify-center gap-2 border border-[#EEECF5] bg-white text-[#1E1B5E] font-medium py-3 rounded-xl hover:bg-[#F5F8FF] transition-colors text-sm"
           >
             <Sparkles size={16} className="text-[#7EC8A4]" />
             Try demo as Anaya (no account needed)

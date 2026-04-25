@@ -1,18 +1,67 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../lib/api'
-import { Moon, Flame, Droplet, TrendingDown, Heart, Zap, CircleAlert as AlertCircle, ArrowRight, Target, Activity, Award, Sparkles, ChartBar as BarChart3, Info } from 'lucide-react'
+import {
+  Moon, Flame, Droplet, TrendingDown, Zap,
+  CircleAlert as AlertCircle, ArrowRight, Target,
+  Activity, Award, Sparkles, ChartBar as BarChart3, Info
+} from 'lucide-react'
+
+const DEMO_PROFILE = {
+  avgCycleLength: 29,
+  avgStressLevel: 4,
+  avgSleepHours: 7.5,
+  sugarIntake: 'medium',
+  onboardingComplete: true,
+}
+
+function calculateRisk(sleepHours, stressLevel, sugarIntake, cycleGapDays) {
+  let risk = 0
+  if (cycleGapDays > 45) risk += 35
+  else if (cycleGapDays > 35) risk += 20
+  else if (cycleGapDays > 30) risk += 10
+
+  if (stressLevel >= 8) risk += 25
+  else if (stressLevel >= 6) risk += 15
+  else if (stressLevel >= 4) risk += 8
+
+  if (sleepHours < 5) risk += 25
+  else if (sleepHours < 6.5) risk += 15
+  else if (sleepHours < 7.5) risk += 5
+
+  if (sugarIntake === 'high') risk += 20
+  else if (sugarIntake === 'medium') risk += 8
+
+  return Math.min(risk, 100)
+}
+
+function getRiskLevel(risk) {
+  if (risk > 60) return { label: 'High', color: '#EA9A98', bg: '#FDECEA' }
+  if (risk > 35) return { label: 'Moderate', color: '#F0C060', bg: '#FFF8E7' }
+  return { label: 'Low', color: '#7EC8A4', bg: '#E8F5EF' }
+}
+
+function getMetrics(p) {
+  return {
+    cycleRegularity: Math.max(40, 100 - Math.max(0, p.cycleGapDays - 28) * 3),
+    hormonalStability: Math.max(20, 100 - calculateRisk(p.sleepHours, p.stressLevel, p.sugarIntake, p.cycleGapDays)),
+    energyLevel: Math.round(
+      ((Math.min(p.sleepHours, 9) / 9) * 50) +
+      (((10 - p.stressLevel) / 10) * 30) +
+      (p.sugarIntake === 'low' ? 20 : p.sugarIntake === 'medium' ? 10 : 0)
+    ),
+  }
+}
 
 export default function RiskSimulatorPage() {
   const navigate = useNavigate()
+  const isDemoMode = localStorage.getItem('hormonaDemoMode') === 'true'
   const userId = localStorage.getItem('hormonaUserId')
 
-  // Whether user has touched any control — results are hidden until then
   const [hasInteracted, setHasInteracted] = useState(false)
-  const [profileLoading, setProfileLoading] = useState(true)
+  const [profileLoading, setProfileLoading] = useState(!isDemoMode)
   const [profileNote, setProfileNote] = useState('')
 
-  // Current (baseline) params — loaded from user profile
   const [params, setParams] = useState({
     cycleGapDays: 28,
     stressLevel: 5,
@@ -20,7 +69,6 @@ export default function RiskSimulatorPage() {
     sugarIntake: 'medium',
   })
 
-  // Simulated (target) params — user adjusts these
   const [simulatedParams, setSimulatedParams] = useState({
     cycleGapDays: 28,
     stressLevel: 3,
@@ -31,12 +79,26 @@ export default function RiskSimulatorPage() {
   const [currentRisk, setCurrentRisk] = useState(null)
   const [simulatedRisk, setSimulatedRisk] = useState(null)
 
-  // Prefill sliders from real user profile
   useEffect(() => {
-    if (!userId) {
-      setProfileLoading(false)
+    if (isDemoMode) {
+      const p = DEMO_PROFILE
+      const loaded = {
+        cycleGapDays: p.avgCycleLength || 28,
+        stressLevel: p.avgStressLevel || 5,
+        sleepHours: p.avgSleepHours || 7,
+        sugarIntake: p.sugarIntake || 'medium',
+      }
+      setParams(loaded)
+      setSimulatedParams({
+        cycleGapDays: loaded.cycleGapDays,
+        stressLevel: Math.max(1, loaded.stressLevel - 2),
+        sleepHours: Math.min(10, loaded.sleepHours + 0.5),
+        sugarIntake: loaded.sugarIntake === 'high' ? 'medium' : 'low',
+      })
       return
     }
+
+    if (!userId) { setProfileLoading(false); return }
 
     api.get(`/users/${userId}`)
       .then(res => {
@@ -48,7 +110,6 @@ export default function RiskSimulatorPage() {
           sugarIntake: u.sugarIntake || 'medium',
         }
         setParams(loaded)
-        // Start simulated as slightly better than current
         setSimulatedParams({
           cycleGapDays: loaded.cycleGapDays,
           stressLevel: Math.max(1, loaded.stressLevel - 2),
@@ -61,50 +122,11 @@ export default function RiskSimulatorPage() {
         }
       })
       .catch(() => {
-        setProfileNote('Using average defaults — your profile baseline could not be loaded.')
+        setProfileNote('Using average defaults — your profile could not be loaded.')
       })
       .finally(() => setProfileLoading(false))
-  }, [userId])
+  }, [userId, isDemoMode])
 
-  // Calculate risk score locally (mirrors server scoring.js logic)
-  const calculateRisk = (sleepHours, stressLevel, sugarIntake, cycleGapDays) => {
-    let risk = 0
-    if (cycleGapDays > 45) risk += 35
-    else if (cycleGapDays > 35) risk += 20
-    else if (cycleGapDays > 30) risk += 10
-
-    if (stressLevel >= 8) risk += 25
-    else if (stressLevel >= 6) risk += 15
-    else if (stressLevel >= 4) risk += 8
-
-    if (sleepHours < 5) risk += 25
-    else if (sleepHours < 6.5) risk += 15
-    else if (sleepHours < 7.5) risk += 5
-
-    if (sugarIntake === 'high') risk += 20
-    else if (sugarIntake === 'medium') risk += 8
-
-    return Math.min(risk, 100)
-  }
-
-  const getRiskLevel = (risk) => {
-    if (risk > 60) return { label: 'High', color: '#EA9A98', bg: '#FDECEA' }
-    if (risk > 35) return { label: 'Moderate', color: '#F0C060', bg: '#FFF8E7' }
-    return { label: 'Low', color: '#7EC8A4', bg: '#E8F5EF' }
-  }
-
-  // Derive dynamic metric estimates from params
-  const getMetrics = (p) => ({
-    cycleRegularity: Math.max(40, 100 - Math.max(0, p.cycleGapDays - 28) * 3),
-    hormonalStability: Math.max(20, 100 - calculateRisk(p.sleepHours, p.stressLevel, p.sugarIntake, p.cycleGapDays)),
-    energyLevel: Math.round(
-      ((Math.min(p.sleepHours, 9) / 9) * 50) +
-      (((10 - p.stressLevel) / 10) * 30) +
-      (p.sugarIntake === 'low' ? 20 : p.sugarIntake === 'medium' ? 10 : 0)
-    ),
-  })
-
-  // Recalculate whenever params change
   useEffect(() => {
     if (!hasInteracted) return
     const cur = calculateRisk(params.sleepHours, params.stressLevel, params.sugarIntake, params.cycleGapDays)
@@ -123,15 +145,13 @@ export default function RiskSimulatorPage() {
     setHasInteracted(true)
   }
 
-  const resetToCurrent = () => {
-    setSimulatedParams({ ...params })
-  }
+  const resetToCurrent = () => setSimulatedParams({ ...params })
 
   const riskReduction = currentRisk && simulatedRisk ? currentRisk.risk - simulatedRisk.risk : 0
 
   if (profileLoading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="w-12 h-12 rounded-full border-2 border-[#7EC8A4] border-t-transparent animate-spin mx-auto mb-4" />
           <p className="text-sm text-[#6B6B8A]">Loading your profile...</p>
@@ -144,19 +164,25 @@ export default function RiskSimulatorPage() {
   const simMetrics = getMetrics(simulatedParams)
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-[#1E1B5E]">Risk Simulator</h1>
         <p className="text-sm text-[#6B6B8A] mt-1">
-          Adjust your lifestyle habits below and see how they affect your estimated PCOD risk.
+          Adjust your lifestyle habits and see how they affect your estimated PCOD risk.
         </p>
       </div>
 
-      {/* Profile note */}
-      {profileNote && (
-        <div className="bg-[#EDE9F8] rounded-xl px-4 py-3 flex items-center gap-2 text-sm text-[#6B6B8A]">
-          <Info size={15} className="text-[#9B8EC4] flex-shrink-0" />
+      {isDemoMode && (
+        <div className="bg-[#E8F5EF] border border-[#C8E9D8] rounded-xl px-4 py-3 flex items-center gap-2 text-sm text-[#1E1B5E]">
+          <Sparkles size={15} className="text-[#7EC8A4]" />
+          Demo mode — using Anaya's profile as baseline.
+        </div>
+      )}
+
+      {profileNote && !isDemoMode && (
+        <div className="bg-[#EEF7F2] rounded-xl px-4 py-3 flex items-center gap-2 text-sm text-[#6B6B8A]">
+          <Info size={15} className="text-[#7EC8A4] flex-shrink-0" />
           {profileNote}
         </div>
       )}
@@ -167,8 +193,8 @@ export default function RiskSimulatorPage() {
           <div className="bg-white rounded-xl border border-[#EEECF5] p-5 shadow-sm">
             <h2 className="font-semibold text-[#1E1B5E] text-lg mb-1">Adjust Your Habits</h2>
             <p className="text-xs text-[#6B6B8A] mb-5">
-              The <span className="font-medium text-[#1E1B5E]">top row</span> is your current baseline.
-              The <span className="font-medium text-[#7EC8A4]">bottom row</span> is your simulated target.
+              The <span className="font-medium text-[#1E1B5E]">top slider</span> is your current baseline.
+              The <span className="font-medium text-[#7EC8A4]">bottom slider</span> is your simulated target.
             </p>
 
             {/* Sleep */}
@@ -231,7 +257,7 @@ export default function RiskSimulatorPage() {
               </div>
             </div>
 
-            {/* Sugar Intake */}
+            {/* Sugar */}
             <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
                 <label className="text-sm font-medium text-[#1E1B5E] flex items-center gap-2">
@@ -243,7 +269,6 @@ export default function RiskSimulatorPage() {
                 </div>
               </div>
 
-              {/* Current sugar row */}
               <div className="flex gap-2 mb-1">
                 {['low', 'medium', 'high'].map(level => (
                   <button
@@ -258,7 +283,6 @@ export default function RiskSimulatorPage() {
                   </button>
                 ))}
               </div>
-              {/* Target sugar row */}
               <div className="flex gap-2">
                 {['low', 'medium', 'high'].map(level => (
                   <button
@@ -274,15 +298,13 @@ export default function RiskSimulatorPage() {
                 ))}
               </div>
               <div className="flex justify-between text-[10px] text-[#6B6B8A] mt-1">
-                <span>Low (Best)</span>
-                <span className="text-[#7EC8A4]">Lower is better for insulin</span>
-                <span>High</span>
+                <span>Low (Best)</span><span>Lower is better for insulin</span><span>High</span>
               </div>
             </div>
 
-            <div className="p-2.5 bg-[#EDE9F8] rounded-lg mt-4">
+            <div className="p-2.5 bg-[#EEF7F2] rounded-lg mt-4">
               <p className="text-[10px] text-[#6B6B8A] text-center">
-                These adjustments are based on research-backed recommendations for hormonal balance and PCOD risk reduction.
+                Adjustments are based on research-backed recommendations for hormonal balance and PCOD risk reduction.
               </p>
             </div>
           </div>
@@ -291,18 +313,17 @@ export default function RiskSimulatorPage() {
         {/* Right — Results */}
         <div className="space-y-5">
           {!hasInteracted ? (
-            /* Pre-interaction placeholder */
             <div className="bg-white rounded-xl border border-[#EEECF5] p-8 shadow-sm flex flex-col items-center justify-center text-center min-h-[280px]">
               <div className="w-16 h-16 rounded-full bg-[#E8F5EF] flex items-center justify-center mb-4">
                 <Activity size={28} className="text-[#7EC8A4]" />
               </div>
               <h2 className="font-semibold text-[#1E1B5E] text-lg mb-2">Adjust sliders to simulate</h2>
               <p className="text-sm text-[#6B6B8A] max-w-xs">
-                Move any slider or change a sugar level on the left to see your estimated PCOD risk in real time.
+                Move any slider or change a sugar level to see your estimated PCOD risk in real time.
               </p>
               <div className="mt-4 flex items-center gap-2 text-xs text-[#7EC8A4] font-medium">
                 <ArrowRight size={14} />
-                Start by changing your target sleep or stress
+                Start by adjusting sleep or stress
               </div>
             </div>
           ) : (
@@ -311,7 +332,6 @@ export default function RiskSimulatorPage() {
               <div className="bg-white rounded-xl border border-[#EEECF5] p-5 shadow-sm">
                 <h2 className="font-semibold text-[#1E1B5E] text-lg mb-4">Simulation Results</h2>
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Current */}
                   <div className="text-center p-3 bg-[#FAF8F5] rounded-xl">
                     <p className="text-xs text-[#6B6B8A] mb-2">Current Lifestyle</p>
                     <div className="relative inline-flex items-center justify-center mb-2">
@@ -337,7 +357,6 @@ export default function RiskSimulatorPage() {
                     </p>
                   </div>
 
-                  {/* Simulated */}
                   <div className="text-center p-3 bg-[#FAF8F5] rounded-xl">
                     <p className="text-xs text-[#6B6B8A] mb-2">Simulated Target</p>
                     <div className="relative inline-flex items-center justify-center mb-2">
@@ -373,14 +392,9 @@ export default function RiskSimulatorPage() {
                     <span className="text-xl font-bold text-[#7EC8A4]">{riskReduction}%</span>
                   </div>
                 )}
-                {riskReduction <= 0 && riskReduction !== 0 && (
-                  <div className="mt-4 p-3 bg-[#FFF8E7] rounded-xl text-xs text-[#6B6B8A] text-center">
-                    Your simulated lifestyle shows similar risk — try reducing stress or improving sleep further.
-                  </div>
-                )}
               </div>
 
-              {/* Dynamic Metrics Comparison */}
+              {/* Metrics Comparison */}
               <div className="bg-white rounded-xl border border-[#EEECF5] p-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <BarChart3 size={16} className="text-[#7EC8A4]" />
@@ -418,63 +432,47 @@ export default function RiskSimulatorPage() {
         </div>
       </div>
 
-      {/* What's Improving — always shown */}
+      {/* Why These Habits Matter */}
       <div className="bg-white rounded-xl border border-[#EEECF5] p-4 shadow-sm">
         <div className="flex items-center gap-2 mb-3">
           <Award size={16} className="text-[#7EC8A4]" />
           <h2 className="font-semibold text-[#1E1B5E] text-sm">Why These Habits Matter</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="p-3 rounded-lg bg-[#E8F5EF]">
-            <div className="flex items-center gap-1 mb-1">
-              <Moon size={13} className="text-[#7EC8A4]" />
-              <h3 className="font-medium text-xs text-[#1E1B5E]">Better Sleep</h3>
+          {[
+            { icon: Moon, title: 'Better Sleep', desc: 'Regulates cortisol and reproductive hormones', bg: '#E8F5EF', color: '#7EC8A4' },
+            { icon: Flame, title: 'Lower Stress', desc: 'Balances cortisol, supports cycle regularity', bg: '#FDECEA', color: '#EA9A98' },
+            { icon: Droplet, title: 'Balanced Sugar', desc: 'Improves insulin sensitivity, reduces PCOD risk', bg: '#EEF7F2', color: '#7EC8A4' },
+            { icon: Zap, title: 'Consistency', desc: 'Small daily changes compound over weeks', bg: '#E8F5EF', color: '#7EC8A4' },
+          ].map(({ icon: Icon, title, desc, bg, color }) => (
+            <div key={title} className="p-3 rounded-lg" style={{ backgroundColor: bg }}>
+              <div className="flex items-center gap-1 mb-1">
+                <Icon size={13} style={{ color }} />
+                <h3 className="font-medium text-xs text-[#1E1B5E]">{title}</h3>
+              </div>
+              <p className="text-[10px] text-[#6B6B8A]">{desc}</p>
             </div>
-            <p className="text-[10px] text-[#6B6B8A]">Regulates cortisol and reproductive hormones</p>
-          </div>
-          <div className="p-3 rounded-lg bg-[#FDECEA]">
-            <div className="flex items-center gap-1 mb-1">
-              <Flame size={13} className="text-[#EA9A98]" />
-              <h3 className="font-medium text-xs text-[#1E1B5E]">Lower Stress</h3>
-            </div>
-            <p className="text-[10px] text-[#6B6B8A]">Balances cortisol, supports cycle regularity</p>
-          </div>
-          <div className="p-3 rounded-lg bg-[#EDE9F8]">
-            <div className="flex items-center gap-1 mb-1">
-              <Droplet size={13} className="text-[#9B8EC4]" />
-              <h3 className="font-medium text-xs text-[#1E1B5E]">Balanced Sugar</h3>
-            </div>
-            <p className="text-[10px] text-[#6B6B8A]">Improves insulin sensitivity, reduces PCOD risk</p>
-          </div>
-          <div className="p-3 rounded-lg bg-[#E8F5EF]">
-            <div className="flex items-center gap-1 mb-1">
-              <Zap size={13} className="text-[#7EC8A4]" />
-              <h3 className="font-medium text-xs text-[#1E1B5E]">Consistency</h3>
-            </div>
-            <p className="text-[10px] text-[#6B6B8A]">Small daily changes compound over weeks</p>
-          </div>
+          ))}
         </div>
       </div>
 
       {/* Recommendations */}
-      <div className="bg-gradient-to-r from-[#EDE9F8] to-[#E8F5EF] rounded-xl p-4">
+      <div className="bg-[#EEF7F2] rounded-xl p-4 border border-[#C8E9D8]">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles size={16} className="text-[#7EC8A4]" />
           <h2 className="font-semibold text-[#1E1B5E] text-sm">Personalised Recommendations</h2>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white rounded-lg p-3">
-            <h3 className="font-medium text-xs text-[#1E1B5E] mb-0.5">Sleep 7–9 hours</h3>
-            <p className="text-[10px] text-[#6B6B8A]">Consistent schedule matters most</p>
-          </div>
-          <div className="bg-white rounded-lg p-3">
-            <h3 className="font-medium text-xs text-[#1E1B5E] mb-0.5">Manage stress daily</h3>
-            <p className="text-[10px] text-[#6B6B8A]">10 min of mindfulness or breathwork</p>
-          </div>
-          <div className="bg-white rounded-lg p-3">
-            <h3 className="font-medium text-xs text-[#1E1B5E] mb-0.5">Choose whole foods</h3>
-            <p className="text-[10px] text-[#6B6B8A]">Fibre & protein over refined sugar</p>
-          </div>
+          {[
+            { title: 'Sleep 7–9 hours', desc: 'Consistent schedule matters most' },
+            { title: 'Manage stress daily', desc: '10 min of mindfulness or breathwork' },
+            { title: 'Choose whole foods', desc: 'Fibre & protein over refined sugar' },
+          ].map(({ title, desc }) => (
+            <div key={title} className="bg-white rounded-lg p-3">
+              <h3 className="font-medium text-xs text-[#1E1B5E] mb-0.5">{title}</h3>
+              <p className="text-[10px] text-[#6B6B8A]">{desc}</p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -488,21 +486,25 @@ export default function RiskSimulatorPage() {
             Reset to Current
           </button>
         )}
-        <button
-          onClick={() => navigate('/log')}
-          className="flex-1 bg-[#7EC8A4] text-white font-semibold py-2.5 rounded-xl hover:bg-[#6ab890] transition-all flex items-center justify-center gap-2 text-sm"
-        >
-          Log Today's Data
-          <ArrowRight size={14} />
-        </button>
+        {!isDemoMode && (
+          <button
+            onClick={() => navigate('/log')}
+            className="flex-1 bg-[#7EC8A4] text-white font-semibold py-2.5 rounded-xl hover:bg-[#6ab890] transition-all flex items-center justify-center gap-2 text-sm"
+          >
+            Log Today's Data
+            <ArrowRight size={14} />
+          </button>
+        )}
+        {isDemoMode && (
+          <button
+            onClick={() => navigate('/signup')}
+            className="flex-1 bg-[#7EC8A4] text-white font-semibold py-2.5 rounded-xl hover:bg-[#6ab890] transition-all flex items-center justify-center gap-2 text-sm"
+          >
+            Create Account
+            <ArrowRight size={14} />
+          </button>
+        )}
       </div>
-
-      <button
-        onClick={() => navigate('/dashboard')}
-        className="text-center w-full text-xs text-[#7EC8A4] hover:underline py-2"
-      >
-        ← Back to Dashboard
-      </button>
     </div>
   )
 }

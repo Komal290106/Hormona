@@ -2,7 +2,6 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
   ClipboardList,
-  Calendar,
   Lightbulb,
   Brain,
   User,
@@ -13,23 +12,21 @@ import {
   Leaf,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import api from '../lib/api'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/log', label: 'Log Data', icon: ClipboardList },
   { to: '/insights', label: 'Insights', icon: Lightbulb },
-  { to: '/simulate', label: 'Risk Simulator', icon: Brain },
+  { to: '/simulate', label: 'Simulate', icon: Brain },
   { to: '/profile', label: 'Profile', icon: User },
 ]
 
-// Phase-based daily tips shown at the bottom of the sidebar
 const PHASE_TIPS = {
-  menstrual: { tip: 'Rest is productive today. Gentle movement supports your body.', phase: 'Menstrual Phase', emoji: '🌑' },
-  follicular: { tip: 'Energy is rising — great time to start new healthy habits.', phase: 'Follicular Phase', emoji: '🌱' },
-  ovulatory: { tip: 'Peak energy and clarity. Make the most of it!', phase: 'Ovulatory Phase', emoji: '🌕' },
-  luteal: { tip: 'Prioritise sleep and reduce sugar for hormonal balance.', phase: 'Luteal Phase', emoji: '🌖' },
-  default: { tip: 'Log your data daily to unlock personalised cycle insights.', phase: 'Your Cycle', emoji: '🌿' },
+  menstrual: { tip: 'Rest is productive today. Gentle movement supports your body.', phase: 'Menstrual Phase' },
+  follicular: { tip: 'Energy is rising — great time to start new healthy habits.', phase: 'Follicular Phase' },
+  ovulatory: { tip: 'Peak energy and clarity. Make the most of it!', phase: 'Ovulatory Phase' },
+  luteal: { tip: 'Prioritise sleep and reduce sugar for hormonal balance.', phase: 'Luteal Phase' },
+  default: { tip: 'Log your data daily to unlock personalised cycle insights.', phase: 'Your Cycle' },
 }
 
 function getDailyTip(lastPeriodDate, avgCycleLength = 28) {
@@ -46,45 +43,50 @@ export default function Layout() {
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userName, setUserName] = useState('')
-  const [loading, setLoading] = useState(true)
   const [tip, setTip] = useState(PHASE_TIPS.default)
 
   useEffect(() => {
     const storedName = localStorage.getItem('hormonaUserName')
-    const storedUserId = localStorage.getItem('hormonaUserId')
-
     setUserName(storedName || 'there')
-    setLoading(false)
 
-    // Fetch real user profile to compute today's cycle phase tip
-    if (storedUserId) {
-      api.get(`/users/${storedUserId}`)
-        .then(res => {
-          const u = res.data
-          if (u.lastPeriodDate) {
-            setTip(getDailyTip(u.lastPeriodDate, u.avgCycleLength || 28))
+    const demoMode = localStorage.getItem('hormonaDemoMode') === 'true'
+    if (demoMode) {
+      // Demo user — compute tip from static demo data
+      setTip(getDailyTip('2025-04-01', 28))
+      return
+    }
+
+    // Real user — compute tip from stored onboarding data
+    const userId = localStorage.getItem('hormonaUserId')
+    if (userId) {
+      const stored = localStorage.getItem(`userData_${userId}`)
+      if (stored) {
+        try {
+          const data = JSON.parse(stored)
+          if (data.lastPeriodDate) {
+            setTip(getDailyTip(data.lastPeriodDate, data.avgCycleLength || 28))
           }
-        })
-        .catch(() => {
-          // Keep default tip on failure
-        })
+        } catch { /* ignore */ }
+      }
     }
   }, [])
 
   const handleSignOut = () => {
     localStorage.removeItem('hormonaUserId')
     localStorage.removeItem('hormonaUserName')
-    localStorage.removeItem('hormonaIsDemo')
-    localStorage.removeItem('hormonaLastPeriod')
-    localStorage.removeItem('hormonaCycleLength')
-    navigate('/login')
+    localStorage.removeItem('hormonaDemoMode')
+    localStorage.removeItem('hormonaOnboardingComplete')
+    navigate('/')
   }
 
-  // ── Sidebar content (shared between desktop & mobile) ──
   const SidebarContent = ({ onLinkClick }) => (
     <>
       {/* Logo */}
-      <div className="px-6 pt-8 pb-6 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+      <div
+        className="px-6 pt-8 pb-6 border-b cursor-pointer"
+        style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+        onClick={() => { navigate('/'); if (onLinkClick) onLinkClick() }}
+      >
         <div className="flex items-center gap-2 mb-1">
           <Heart size={26} style={{ color: '#7EC8A4' }} fill="#7EC8A4" />
           <h1 className="text-white font-bold text-2xl tracking-tight">HORMONA</h1>
@@ -99,11 +101,13 @@ export default function Layout() {
             className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
             style={{ backgroundColor: '#7EC8A4' }}
           >
-            {!loading && userName ? userName[0]?.toUpperCase() : '?'}
+            {userName ? userName[0]?.toUpperCase() : 'U'}
           </div>
           <div className="min-w-0">
-            <p className="text-white/70 text-xs font-medium">Good morning,</p>
-            <p className="text-white font-bold text-sm truncate">{!loading ? userName : '...'}</p>
+            <p className="text-white/70 text-xs font-medium">
+              {localStorage.getItem('hormonaDemoMode') === 'true' ? 'Demo Mode' : 'Good morning,'}
+            </p>
+            <p className="text-white font-bold text-sm truncate">{userName}</p>
           </div>
         </div>
       </div>
@@ -131,15 +135,12 @@ export default function Layout() {
         ))}
       </nav>
 
-      {/* Daily tip strip — replaces the illustration placeholder */}
+      {/* Daily tip */}
       <div className="mx-5 mb-4 p-3 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
         <div className="flex items-start gap-2">
-          <span className="text-lg leading-none flex-shrink-0">{tip.emoji}</span>
+          <Leaf size={13} style={{ color: '#7EC8A4' }} className="mt-0.5 flex-shrink-0" />
           <div>
-            <div className="flex items-center gap-1.5 mb-1">
-              <Leaf size={11} style={{ color: '#7EC8A4' }} />
-              <span className="text-xs font-semibold" style={{ color: '#7EC8A4' }}>{tip.phase}</span>
-            </div>
+            <span className="text-xs font-semibold block mb-1" style={{ color: '#7EC8A4' }}>{tip.phase}</span>
             <p className="text-white/60 text-xs leading-relaxed">{tip.tip}</p>
           </div>
         </div>
@@ -161,7 +162,7 @@ export default function Layout() {
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: '#FAF8F5' }}>
 
-      {/* ── Desktop sidebar ── */}
+      {/* Desktop sidebar */}
       <aside
         className="hidden md:flex fixed h-full w-64 flex-col"
         style={{ backgroundColor: '#1E1B5E' }}
@@ -169,7 +170,7 @@ export default function Layout() {
         <SidebarContent onLinkClick={undefined} />
       </aside>
 
-      {/* ── Mobile menu button ── */}
+      {/* Mobile menu button */}
       <button
         className="fixed top-4 left-4 z-50 p-2 rounded-lg md:hidden shadow-md"
         style={{ backgroundColor: '#1E1B5E' }}
@@ -181,7 +182,7 @@ export default function Layout() {
         }
       </button>
 
-      {/* ── Mobile overlay ── */}
+      {/* Mobile overlay */}
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 md:hidden"
@@ -189,18 +190,17 @@ export default function Layout() {
         />
       )}
 
-      {/* ── Mobile sidebar ── */}
+      {/* Mobile sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 z-40 flex flex-col transform transition-transform duration-300 md:hidden ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+        className={`fixed top-0 left-0 h-full w-64 z-40 flex flex-col transform transition-transform duration-300 md:hidden ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ backgroundColor: '#1E1B5E' }}
       >
         <SidebarContent onLinkClick={() => setMobileMenuOpen(false)} />
       </aside>
 
-      {/* ── Main content ── */}
+      {/* Main content */}
       <main className="flex-1 md:ml-64">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto px-6 py-8">
           <Outlet />
         </div>
       </main>

@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../lib/api'
-import { Heart, ChevronRight, ChevronLeft, Check, Moon, Droplet, Flame, Apple, Activity, CircleAlert as AlertCircle, Calendar, Sparkles } from 'lucide-react'
+import {
+  Heart, ChevronRight, ChevronLeft, Check, Moon, Droplet,
+  Flame, Apple, Activity, CircleAlert as AlertCircle,
+  Calendar, Sparkles, Leaf, Sun, CloudRain, Wind
+} from 'lucide-react'
 
-// ─── Step definitions ───────────────────────────────────────────────────────
 const STEPS = [
   { id: 1, title: 'About You', subtitle: 'Basic info to personalise your experience' },
   { id: 2, title: 'Your Cycle', subtitle: 'Help us understand your menstrual health' },
@@ -13,61 +16,49 @@ const STEPS = [
 ]
 
 const SYMPTOM_OPTIONS = [
-  { key: 'irregularPeriods', label: 'Irregular periods', icon: '🔄' },
-  { key: 'acne', label: 'Acne / oily skin', icon: '✨' },
-  { key: 'hairLoss', label: 'Hair thinning / loss', icon: '💆' },
-  { key: 'weightGain', label: 'Unexplained weight gain', icon: '⚖️' },
-  { key: 'fatigue', label: 'Chronic fatigue', icon: '😴' },
-  { key: 'moodSwings', label: 'Mood swings', icon: '🌊' },
-  { key: 'bloating', label: 'Bloating', icon: '🫧' },
-  { key: 'excessHairGrowth', label: 'Excess hair (face/body)', icon: '🌿' },
-  { key: 'cramping', label: 'Severe cramps', icon: '⚡' },
-  { key: 'none', label: 'None of these', icon: '✅' },
+  { key: 'irregularPeriods', label: 'Irregular periods', icon: Wind },
+  { key: 'acne', label: 'Acne / oily skin', icon: Sun },
+  { key: 'hairLoss', label: 'Hair thinning / loss', icon: Leaf },
+  { key: 'weightGain', label: 'Unexplained weight gain', icon: Activity },
+  { key: 'fatigue', label: 'Chronic fatigue', icon: Moon },
+  { key: 'moodSwings', label: 'Mood swings', icon: CloudRain },
+  { key: 'bloating', label: 'Bloating', icon: Droplet },
+  { key: 'excessHairGrowth', label: 'Excess hair (face/body)', icon: Leaf },
+  { key: 'cramping', label: 'Severe cramps', icon: Flame },
+  { key: 'none', label: 'None of these', icon: Check },
 ]
 
 const MOOD_OPTIONS = ['Great', 'Good', 'Okay', 'Low', 'Bad']
 
-// ─── Component ───────────────────────────────────────────────────────────────
 export default function OnboardingPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // ── Form state ──
   const [form, setForm] = useState({
-    // Step 1 — About You
     age: '',
-    ageRange: '',           // 'under18' | '18-24' | '25-34' | '35+'
-
-    // Step 2 — Cycle
+    ageRange: '',
     lastPeriodDate: '',
     avgCycleLength: 28,
-    cycleVariation: 'regular',    // 'regular' | 'slightly' | 'irregular' | 'very_irregular'
+    cycleVariation: 'regular',
     avgPeriodDuration: 5,
-    typicalFlow: 'medium',        // 'light' | 'medium' | 'heavy' | 'varies'
-    everDiagnosedPCOD: '',        // 'yes' | 'no' | 'suspected' | 'unsure'
-
-    // Step 3 — Habits
+    typicalFlow: 'medium',
+    everDiagnosedPCOD: '',
     avgSleepHours: 7,
-    sleepQuality: 'okay',         // 'poor' | 'okay' | 'good' | 'excellent'
-    avgStressLevel: 5,            // 1-10
-    avgWaterIntake: 6,            // glasses
-    exerciseFrequency: '2-3',     // 'none' | '1-2' | '2-3' | '4-5' | 'daily'
-    dietType: 'balanced',         // 'balanced' | 'high_sugar' | 'vegetarian' | 'vegan' | 'keto'
-    sugarIntake: 'medium',        // 'low' | 'medium' | 'high'
-
-    // Step 4 — Symptoms
+    sleepQuality: 'okay',
+    avgStressLevel: 5,
+    avgWaterIntake: 6,
+    exerciseFrequency: '2-3',
+    dietType: 'balanced',
+    sugarIntake: 'medium',
     symptoms: [],
-
-    // Step 5 — Baseline
-    recentMoodTrend: 'okay',      // mood in past 2 weeks
-    recentSleepTrend: 'okay',     // 'declining' | 'stable' | 'improving'
+    recentMoodTrend: 'okay',
+    recentSleepTrend: 'stable',
     recentStressTrend: 'stable',
-    goal: 'understand',           // 'understand' | 'track_cycle' | 'manage_pcod' | 'improve_habits' | 'all'
+    goal: 'understand',
   })
 
-  // ── Helpers ──
   const set = (key, value) => setForm(f => ({ ...f, [key]: value }))
 
   const toggleSymptom = (key) => {
@@ -101,11 +92,7 @@ export default function OnboardingPage() {
     try {
       setLoading(true)
       const userId = localStorage.getItem('hormonaUserId')
-
-      if (!userId) {
-        navigate('/login')
-        return
-      }
+      if (!userId) { navigate('/login'); return }
 
       const payload = {
         age: form.age || null,
@@ -127,7 +114,7 @@ export default function OnboardingPage() {
         recentSleepTrend: form.recentSleepTrend,
         recentStressTrend: form.recentStressTrend,
         goal: form.goal,
-        onboardingComplete: true
+        onboardingComplete: true,
       }
 
       try {
@@ -137,9 +124,7 @@ export default function OnboardingPage() {
       }
 
       localStorage.setItem('hormonaOnboardingComplete', 'true')
-      localStorage.setItem(`onboarding_${userId}`, 'true')
       localStorage.setItem(`userData_${userId}`, JSON.stringify(payload))
-
       navigate('/dashboard')
     } catch (err) {
       console.error('Onboarding error:', err)
@@ -149,13 +134,15 @@ export default function OnboardingPage() {
     }
   }
 
-  // ─── Progress bar ─────────────────────────────────────────────────────────
   const progress = ((step - 1) / (STEPS.length - 1)) * 100
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center px-4 py-12">
       {/* Logo */}
-      <div className="flex items-center gap-2 mb-10">
+      <div
+        className="flex items-center gap-2 mb-10 cursor-pointer"
+        onClick={() => navigate('/')}
+      >
         <Heart size={24} style={{ color: '#7EC8A4' }} fill="#7EC8A4" />
         <span className="text-[#1E1B5E] font-bold text-xl tracking-tight">HORMONA</span>
       </div>
@@ -193,16 +180,15 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="mx-8 mb-2 bg-[#FDECEA] text-red-600 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
             <AlertCircle size={14} /> {error}
           </div>
         )}
 
-        {/* Step content */}
         <div className="px-8 pb-8 space-y-5">
-          {/* ── STEP 1: About You ── */}
+
+          {/* STEP 1: About You */}
           {step === 1 && (
             <>
               <div>
@@ -231,7 +217,7 @@ export default function OnboardingPage() {
 
               <div>
                 <label className="block text-sm font-medium text-[#1A1A2E] mb-1.5">
-                  Exact age <span className="text-[#6B6B8A] font-normal">(optional, improves accuracy)</span>
+                  Exact age <span className="text-[#6B6B8A] font-normal">(optional)</span>
                 </label>
                 <input
                   type="number"
@@ -270,7 +256,7 @@ export default function OnboardingPage() {
             </>
           )}
 
-          {/* ── STEP 2: Your Cycle ── */}
+          {/* STEP 2: Your Cycle */}
           {step === 2 && (
             <>
               <div>
@@ -335,7 +321,7 @@ export default function OnboardingPage() {
                     type="range" min="2" max="10" step="1"
                     value={form.avgPeriodDuration}
                     onChange={e => set('avgPeriodDuration', parseInt(e.target.value))}
-                    className="w-full accent-[#E8A598]"
+                    className="w-full accent-[#EA9A98]"
                   />
                 </div>
                 <div>
@@ -343,7 +329,9 @@ export default function OnboardingPage() {
                   <div className="space-y-1">
                     {['light', 'medium', 'heavy', 'varies'].map(v => (
                       <button key={v} type="button" onClick={() => set('typicalFlow', v)}
-                        className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${form.typicalFlow === v ? 'border-[#E8A598] bg-[#FDECEA] text-[#1E1B5E]' : 'border-[#EEECF5] text-[#6B6B8A]'
+                        className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${form.typicalFlow === v
+                          ? 'border-[#EA9A98] bg-[#FDECEA] text-[#1E1B5E]'
+                          : 'border-[#EEECF5] text-[#6B6B8A]'
                           }`}>
                         {v.charAt(0).toUpperCase() + v.slice(1)}
                       </button>
@@ -359,7 +347,7 @@ export default function OnboardingPage() {
                     { val: 'yes', label: 'Yes, diagnosed' },
                     { val: 'suspected', label: 'Suspected but unconfirmed' },
                     { val: 'no', label: 'No' },
-                    { val: 'unsure', label: "Not sure" },
+                    { val: 'unsure', label: 'Not sure' },
                   ].map(opt => (
                     <button
                       key={opt.val}
@@ -378,7 +366,7 @@ export default function OnboardingPage() {
             </>
           )}
 
-          {/* ── STEP 3: Daily Habits ── */}
+          {/* STEP 3: Daily Habits */}
           {step === 3 && (
             <>
               <div>
@@ -400,10 +388,10 @@ export default function OnboardingPage() {
                 <label className="block text-sm font-medium text-[#1A1A2E] mb-3">Sleep quality</label>
                 <div className="flex gap-2">
                   {[
-                    { val: 'poor', label: '😴 Poor' },
-                    { val: 'okay', label: '😐 Okay' },
-                    { val: 'good', label: '😊 Good' },
-                    { val: 'excellent', label: '✨ Excellent' },
+                    { val: 'poor', label: 'Poor' },
+                    { val: 'okay', label: 'Okay' },
+                    { val: 'good', label: 'Good' },
+                    { val: 'excellent', label: 'Excellent' },
                   ].map(opt => (
                     <button key={opt.val} type="button" onClick={() => set('sleepQuality', opt.val)}
                       className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${form.sleepQuality === opt.val
@@ -479,7 +467,7 @@ export default function OnboardingPage() {
                     ].map(opt => (
                       <button key={opt.val} type="button" onClick={() => set('sugarIntake', opt.val)}
                         className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${form.sugarIntake === opt.val
-                          ? 'border-[#E8A598] bg-[#FDECEA] text-[#1E1B5E] font-medium'
+                          ? 'border-[#EA9A98] bg-[#FDECEA] text-[#1E1B5E] font-medium'
                           : 'border-[#EEECF5] text-[#6B6B8A]'
                           }`}>
                         {opt.label}
@@ -491,14 +479,14 @@ export default function OnboardingPage() {
             </>
           )}
 
-          {/* ── STEP 4: PCOD Symptoms ── */}
+          {/* STEP 4: Symptoms */}
           {step === 4 && (
             <>
               <p className="text-sm text-[#6B6B8A]">
-                Select all symptoms you commonly experience. This helps us calculate your baseline PCOD risk score accurately.
+                Select all symptoms you commonly experience. This helps us calculate your baseline PCOD risk accurately.
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {SYMPTOM_OPTIONS.map(({ key, label, icon }) => {
+                {SYMPTOM_OPTIONS.map(({ key, label, icon: Icon }) => {
                   const selected = form.symptoms.includes(key)
                   return (
                     <button
@@ -510,7 +498,7 @@ export default function OnboardingPage() {
                         : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50'
                         } ${key === 'none' ? 'col-span-2' : ''}`}
                     >
-                      <span className="text-base">{icon}</span>
+                      <Icon size={14} style={{ color: selected ? '#7EC8A4' : '#6B6B8A' }} />
                       <span className="flex-1">{label}</span>
                       {selected && <Check size={14} className="text-[#7EC8A4] flex-shrink-0" />}
                     </button>
@@ -527,7 +515,7 @@ export default function OnboardingPage() {
             </>
           )}
 
-          {/* ── STEP 5: Health Baseline ── */}
+          {/* STEP 5: Baseline */}
           {step === 5 && (
             <>
               <p className="text-sm text-[#6B6B8A]">
@@ -557,9 +545,9 @@ export default function OnboardingPage() {
                 </label>
                 <div className="flex gap-2">
                   {[
-                    { val: 'declining', label: '📉 Getting worse' },
-                    { val: 'stable', label: '➡️ Stable' },
-                    { val: 'improving', label: '📈 Improving' },
+                    { val: 'declining', label: 'Getting worse' },
+                    { val: 'stable', label: 'Stable' },
+                    { val: 'improving', label: 'Improving' },
                   ].map(opt => (
                     <button key={opt.val} type="button" onClick={() => set('recentSleepTrend', opt.val)}
                       className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${form.recentSleepTrend === opt.val
@@ -578,13 +566,13 @@ export default function OnboardingPage() {
                 </label>
                 <div className="flex gap-2">
                   {[
-                    { val: 'declining', label: '📉 More stressed' },
-                    { val: 'stable', label: '➡️ Stable' },
-                    { val: 'improving', label: '📈 Less stressed' },
+                    { val: 'declining', label: 'More stressed' },
+                    { val: 'stable', label: 'Stable' },
+                    { val: 'improving', label: 'Less stressed' },
                   ].map(opt => (
                     <button key={opt.val} type="button" onClick={() => set('recentStressTrend', opt.val)}
                       className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${form.recentStressTrend === opt.val
-                        ? 'border-[#E8A598] bg-[#FDECEA] text-[#1E1B5E]'
+                        ? 'border-[#EA9A98] bg-[#FDECEA] text-[#1E1B5E]'
                         : 'border-[#EEECF5] text-[#6B6B8A]'
                         }`}>
                       {opt.label}
@@ -593,8 +581,7 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              {/* Summary */}
-              <div className="bg-gradient-to-r from-[#EDE9F8] to-[#E8F5EF] rounded-xl p-4 mt-2">
+              <div className="bg-[#E8F5EF] rounded-xl p-4 mt-2">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles size={14} className="text-[#7EC8A4]" />
                   <span className="text-sm font-semibold text-[#1E1B5E]">You're all set!</span>
@@ -606,7 +593,7 @@ export default function OnboardingPage() {
             </>
           )}
 
-          {/* ── Navigation buttons ── */}
+          {/* Navigation */}
           <div className="flex items-center justify-between pt-2">
             {step > 1 ? (
               <button
@@ -627,7 +614,7 @@ export default function OnboardingPage() {
               className="flex items-center gap-2 bg-[#7EC8A4] text-white font-semibold px-6 py-2.5 rounded-xl hover:bg-[#6ab890] transition-colors disabled:opacity-50"
             >
               {loading ? 'Saving...' : step === STEPS.length ? (
-                <>Go to Dashboard <Sparkles size={15} /></>
+                <>Finish Setup <Sparkles size={15} /></>
               ) : (
                 <>Next <ChevronRight size={15} /></>
               )}
@@ -635,14 +622,6 @@ export default function OnboardingPage() {
           </div>
         </div>
       </div>
-
-      {/* Skip link */}
-      <button
-        onClick={() => navigate('/dashboard')}
-        className="mt-4 text-xs text-[#6B6B8A] hover:text-[#1E1B5E] underline"
-      >
-        Skip for now
-      </button>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Heart, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Heart, Eye, EyeOff, ArrowRight, CheckCircle } from 'lucide-react'
 import api from '../lib/api'
 
 export default function SignupPage() {
@@ -34,6 +34,8 @@ export default function SignupPage() {
         email: form.email,
         password: form.password,
       })
+      localStorage.removeItem('hormonaDemoMode')
+      localStorage.removeItem('hormonaOnboardingComplete')
       localStorage.setItem('hormonaUserId', res.data._id)
       localStorage.setItem('hormonaUserName', res.data.name)
       navigate('/onboarding')
