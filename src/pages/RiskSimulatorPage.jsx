@@ -99,7 +99,7 @@ function HabitSlider({ icon: Icon, iconColor, label, currentVal, targetVal, min,
               type="range" min={min} max={max} step={step}
               value={currentVal}
               onChange={e => onChangeCurrent(step === 1 ? parseInt(e.target.value) : parseFloat(e.target.value))}
-              className="w-full h-1.5 rounded-full appearance-none"
+              className="w-full h-1.5 rounded-full appearance-none bg-[#DDDAE8]"
               style={{ accentColor: '#1E1B5E' }}
             />
           </div>
@@ -112,7 +112,7 @@ function HabitSlider({ icon: Icon, iconColor, label, currentVal, targetVal, min,
               type="range" min={min} max={max} step={step}
               value={targetVal}
               onChange={e => onChangeTarget(step === 1 ? parseInt(e.target.value) : parseFloat(e.target.value))}
-              className="w-full h-1.5 rounded-full appearance-none"
+              className="w-full h-1.5 rounded-full appearance-none bg-[#C8E9D8]"
               style={{ accentColor: '#7EC8A4' }}
             />
           </div>
