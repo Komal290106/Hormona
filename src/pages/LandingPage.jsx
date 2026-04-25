@@ -28,8 +28,8 @@ export default function LandingPage() {
     <div className="min-h-screen" style={{ backgroundColor: '#FAF8F5' }}>
       {/* NAVBAR */}
       <nav className="flex justify-between items-center px-8 py-5 max-w-7xl mx-auto">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-          <img src={logo} alt="Hormona" className="h-10 w-auto" />
+        <div className="flex items-center gap-1 cursor-pointer" onClick={() => navigate('/')}>
+          <img src={logo} alt="Hormona" className="h-9 w-9 object-contain" />
           <span className="text-2xl font-bold tracking-tight" style={{ color: '#1E1B5E' }}>HORMONA</span>
         </div>
         <button
