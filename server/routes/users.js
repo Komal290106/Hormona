@@ -92,6 +92,22 @@ router.put('/:id/onboarding', async (req, res) => {
   }
 });
 
+// ── GET /api/users/demo ───────────────────────────────────────────────────
+// Returns Anaya's real seeded account (no auth needed — demo only)
+router.get('/demo', async (req, res) => {
+  try {
+    const anaya = await User.findOne({ email: 'anaya@hormona.app' }).select('-password');
+    if (!anaya) {
+      return res.status(404).json({
+        message: 'Demo user not found. Run: cd server && node seed.js'
+      });
+    }
+    res.json(anaya);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ── GET /api/users/:id ────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {

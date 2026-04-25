@@ -9,24 +9,24 @@ import {
 
 // ─── Step definitions ───────────────────────────────────────────────────────
 const STEPS = [
-  { id: 1, title: 'About You',         subtitle: 'Basic info to personalise your experience' },
-  { id: 2, title: 'Your Cycle',        subtitle: 'Help us understand your menstrual health' },
-  { id: 3, title: 'Daily Habits',      subtitle: 'Your typical lifestyle patterns' },
-  { id: 4, title: 'PCOD Symptoms',     subtitle: 'Let us know what you experience' },
-  { id: 5, title: 'Health Baseline',   subtitle: 'Recent trends to calibrate your score' },
+  { id: 1, title: 'About You', subtitle: 'Basic info to personalise your experience' },
+  { id: 2, title: 'Your Cycle', subtitle: 'Help us understand your menstrual health' },
+  { id: 3, title: 'Daily Habits', subtitle: 'Your typical lifestyle patterns' },
+  { id: 4, title: 'PCOD Symptoms', subtitle: 'Let us know what you experience' },
+  { id: 5, title: 'Health Baseline', subtitle: 'Recent trends to calibrate your score' },
 ]
 
 const SYMPTOM_OPTIONS = [
-  { key: 'irregularPeriods',   label: 'Irregular periods',     icon: '🔄' },
-  { key: 'acne',               label: 'Acne / oily skin',      icon: '✨' },
-  { key: 'hairLoss',           label: 'Hair thinning / loss',  icon: '💆' },
-  { key: 'weightGain',         label: 'Unexplained weight gain',icon: '⚖️' },
-  { key: 'fatigue',            label: 'Chronic fatigue',       icon: '😴' },
-  { key: 'moodSwings',         label: 'Mood swings',           icon: '🌊' },
-  { key: 'bloating',           label: 'Bloating',              icon: '🫧' },
-  { key: 'excessHairGrowth',   label: 'Excess hair (face/body)',icon: '🌿' },
-  { key: 'cramping',           label: 'Severe cramps',         icon: '⚡' },
-  { key: 'none',               label: 'None of these',         icon: '✅' },
+  { key: 'irregularPeriods', label: 'Irregular periods', icon: '🔄' },
+  { key: 'acne', label: 'Acne / oily skin', icon: '✨' },
+  { key: 'hairLoss', label: 'Hair thinning / loss', icon: '💆' },
+  { key: 'weightGain', label: 'Unexplained weight gain', icon: '⚖️' },
+  { key: 'fatigue', label: 'Chronic fatigue', icon: '😴' },
+  { key: 'moodSwings', label: 'Mood swings', icon: '🌊' },
+  { key: 'bloating', label: 'Bloating', icon: '🫧' },
+  { key: 'excessHairGrowth', label: 'Excess hair (face/body)', icon: '🌿' },
+  { key: 'cramping', label: 'Severe cramps', icon: '⚡' },
+  { key: 'none', label: 'None of these', icon: '✅' },
 ]
 
 const MOOD_OPTIONS = ['Great', 'Good', 'Okay', 'Low', 'Bad']
@@ -100,66 +100,95 @@ export default function OnboardingPage() {
   }
 
   const back = () => { setError(''); setStep(s => s - 1) }
-// Replace the handleSubmit function in your OnboardingPage.jsx with this:
+  // Replace the handleSubmit function in your OnboardingPage.jsx with this:
 
-const handleSubmit = async () => {
-  try {
-    setLoading(true)
-    const userId = localStorage.getItem('hormonaUserId')
-    
-    if (!userId) {
-      console.error('No user ID found')
-      navigate('/login')
-      return
-    }
-
-    // Build payload for backend
-    const payload = {
-      ...form,
-      userId,
-      onboardingComplete: true,
-      // Flatten nested structure for backend
-      age: form.age || null,
-      ageRange: form.ageRange,
-      lastPeriodDate: form.lastPeriodDate,
-      avgCycleLength: form.avgCycleLength,
-      cycleVariation: form.cycleVariation,
-      avgPeriodDuration: form.avgPeriodDuration,
-      typicalFlow: form.typicalFlow,
-      everDiagnosedPCOD: form.everDiagnosedPCOD,
-      avgSleepHours: form.avgSleepHours,
-      sleepQuality: form.sleepQuality,
-      avgStressLevel: form.avgStressLevel,
-      avgWaterIntake: form.avgWaterIntake,
-      exerciseFrequency: form.exerciseFrequency,
-      sugarIntake: form.sugarIntake,
-      symptoms: form.symptoms,
-      recentMoodTrend: form.recentMoodTrend,
-      recentSleepTrend: form.recentSleepTrend,
-      recentStressTrend: form.recentStressTrend,
-      goal: form.goal,
-    }
-
-    // Try to save to backend
+  const handleSubmit = async () => {
     try {
-      await axios.put(`/api/users/${userId}/onboarding`, payload)
+      setLoading(true)
+      const userId = localStorage.getItem('hormonaUserId')
+
+      if (!userId) {
+        console.error('No user ID found')
+        navigate('/login')
+        return
+      }
+
+      // Build payload for backend
+      const payload = {
+        age: form.age || null,
+        ageRange: form.ageRange,
+        lastPeriodDate: form.lastPeriodDate,
+        avgCycleLength: form.avgCycleLength,
+        cycleVariation: form.cycleVariation,
+        avgPeriodDuration: form.avgPeriodDuration,
+        typicalFlow: form.typicalFlow,
+        everDiagnosedPCOD: form.everDiagnosedPCOD,
+        avgSleepHours: form.avgSleepHours,
+        sleepQuality: form.sleepQuality,
+        avgStressLevel: form.avgStressLevel,
+        avgWaterIntake: form.avgWaterIntake,
+        exerciseFrequency: form.exerciseFrequency,
+        sugarIntake: form.sugarIntake,
+        symptoms: form.symptoms,
+        recentMoodTrend: form.recentMoodTrend,
+        recentSleepTrend: form.recentSleepTrend,
+        recentStressTrend: form.recentStressTrend,
+        goal: form.goal,
+        onboardingComplete: true
+      }
+
+      // Try to save to backend
+      try {
+        await axios.put(`http://localhost:5000/api/users/${userId}/onboarding`, payload)
+        console.log('Onboarding data saved to backend')
+      } catch (err) {
+        console.warn('Backend not available, saving to localStorage only:', err.message)
+      }
+
+      // Save onboarding data to localStorage as backup
+      localStorage.setItem(`onboarding_${userId}`, 'true')
+      localStorage.setItem(`userData_${userId}`, JSON.stringify(payload))
+
+      // Navigate to dashboard
+      navigate('/dashboard')
     } catch (err) {
-      console.warn('Backend not available, saving to localStorage only:', err.message)
+      console.error('Onboarding error:', err)
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
     }
-    
-    // Save onboarding data to localStorage for demo mode
-    localStorage.setItem('hormonaOnboardingComplete', 'true')
-    localStorage.setItem('hormonaUserData', JSON.stringify(payload))
-    
-    // Navigate to dashboard
-    navigate('/dashboard')
-  } catch (err) {
-    console.error('Onboarding error:', err)
-    setError('Something went wrong. Please try again.')
-  } finally {
-    setLoading(false)
   }
-}
+
+
+  // PUT /api/users/:userId/onboarding - Save onboarding data
+  router.put('/:userId/onboarding', async (req, res) => {
+    try {
+      const { userId } = req.params
+      const onboardingData = req.body
+
+      // Update user with onboarding data
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+          $set: {
+            ...onboardingData,
+            onboardingComplete: true,
+            updatedAt: new Date()
+          }
+        },
+        { new: true }
+      )
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: 'User not found' })
+      }
+
+      res.json({ success: true, user: updatedUser })
+    } catch (err) {
+      console.error('Onboarding save error:', err)
+      res.status(500).json({ error: err.message })
+    }
+  })
 
   // ─── Progress bar ─────────────────────────────────────────────────────────
   const progress = ((step - 1) / (STEPS.length - 1)) * 100
@@ -222,19 +251,18 @@ const handleSubmit = async () => {
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { val: 'under18', label: 'Under 18' },
-                    { val: '18-24',   label: '18 – 24' },
-                    { val: '25-34',   label: '25 – 34' },
-                    { val: '35+',     label: '35 or older' },
+                    { val: '18-24', label: '18 – 24' },
+                    { val: '25-34', label: '25 – 34' },
+                    { val: '35+', label: '35 or older' },
                   ].map(opt => (
                     <button
                       key={opt.val}
                       type="button"
                       onClick={() => set('ageRange', opt.val)}
-                      className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all ${
-                        form.ageRange === opt.val
-                          ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
-                          : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50'
-                      }`}
+                      className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all ${form.ageRange === opt.val
+                        ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
+                        : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50'
+                        }`}
                     >
                       {opt.label}
                     </button>
@@ -260,21 +288,20 @@ const handleSubmit = async () => {
                 <label className="block text-sm font-medium text-[#1A1A2E] mb-3">What's your primary goal with Hormona?</label>
                 <div className="space-y-2">
                   {[
-                    { val: 'understand',     label: 'Understand my hormonal health' },
-                    { val: 'track_cycle',    label: 'Track my menstrual cycle' },
-                    { val: 'manage_pcod',    label: 'Manage PCOD / PCOS symptoms' },
+                    { val: 'understand', label: 'Understand my hormonal health' },
+                    { val: 'track_cycle', label: 'Track my menstrual cycle' },
+                    { val: 'manage_pcod', label: 'Manage PCOD / PCOS symptoms' },
                     { val: 'improve_habits', label: 'Improve my daily habits' },
-                    { val: 'all',            label: 'All of the above' },
+                    { val: 'all', label: 'All of the above' },
                   ].map(opt => (
                     <button
                       key={opt.val}
                       type="button"
                       onClick={() => set('goal', opt.val)}
-                      className={`w-full py-2.5 px-4 rounded-xl border text-sm text-left transition-all ${
-                        form.goal === opt.val
-                          ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E] font-medium'
-                          : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50'
-                      }`}
+                      className={`w-full py-2.5 px-4 rounded-xl border text-sm text-left transition-all ${form.goal === opt.val
+                        ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E] font-medium'
+                        : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50'
+                        }`}
                     >
                       {opt.label}
                     </button>
@@ -319,20 +346,19 @@ const handleSubmit = async () => {
                 <label className="block text-sm font-medium text-[#1A1A2E] mb-3">How regular is your cycle?</label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { val: 'regular',       label: 'Very regular', sub: '±1-2 days' },
-                    { val: 'slightly',      label: 'Slightly irregular', sub: '±3-5 days' },
-                    { val: 'irregular',     label: 'Irregular', sub: '±7+ days' },
-                    { val: 'very_irregular',label: 'Very irregular', sub: 'Unpredictable' },
+                    { val: 'regular', label: 'Very regular', sub: '±1-2 days' },
+                    { val: 'slightly', label: 'Slightly irregular', sub: '±3-5 days' },
+                    { val: 'irregular', label: 'Irregular', sub: '±7+ days' },
+                    { val: 'very_irregular', label: 'Very irregular', sub: 'Unpredictable' },
                   ].map(opt => (
                     <button
                       key={opt.val}
                       type="button"
                       onClick={() => set('cycleVariation', opt.val)}
-                      className={`py-2.5 px-3 rounded-xl border text-left transition-all ${
-                        form.cycleVariation === opt.val
-                          ? 'border-[#7EC8A4] bg-[#E8F5EF]'
-                          : 'border-[#EEECF5] hover:border-[#7EC8A4]/50'
-                      }`}
+                      className={`py-2.5 px-3 rounded-xl border text-left transition-all ${form.cycleVariation === opt.val
+                        ? 'border-[#7EC8A4] bg-[#E8F5EF]'
+                        : 'border-[#EEECF5] hover:border-[#7EC8A4]/50'
+                        }`}
                     >
                       <div className="text-sm font-medium text-[#1E1B5E]">{opt.label}</div>
                       <div className="text-xs text-[#6B6B8A]">{opt.sub}</div>
@@ -356,11 +382,10 @@ const handleSubmit = async () => {
                 <div>
                   <label className="block text-sm font-medium text-[#1A1A2E] mb-2">Typical flow</label>
                   <div className="space-y-1">
-                    {['light','medium','heavy','varies'].map(v => (
+                    {['light', 'medium', 'heavy', 'varies'].map(v => (
                       <button key={v} type="button" onClick={() => set('typicalFlow', v)}
-                        className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${
-                          form.typicalFlow === v ? 'border-[#E8A598] bg-[#FDECEA] text-[#1E1B5E]' : 'border-[#EEECF5] text-[#6B6B8A]'
-                        }`}>
+                        className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${form.typicalFlow === v ? 'border-[#E8A598] bg-[#FDECEA] text-[#1E1B5E]' : 'border-[#EEECF5] text-[#6B6B8A]'
+                          }`}>
                         {v.charAt(0).toUpperCase() + v.slice(1)}
                       </button>
                     ))}
@@ -372,20 +397,19 @@ const handleSubmit = async () => {
                 <label className="block text-sm font-medium text-[#1A1A2E] mb-3">Have you ever been diagnosed with PCOD/PCOS? *</label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { val: 'yes',       label: 'Yes, diagnosed' },
+                    { val: 'yes', label: 'Yes, diagnosed' },
                     { val: 'suspected', label: 'Suspected but unconfirmed' },
-                    { val: 'no',        label: 'No' },
-                    { val: 'unsure',    label: "Not sure" },
+                    { val: 'no', label: 'No' },
+                    { val: 'unsure', label: "Not sure" },
                   ].map(opt => (
                     <button
                       key={opt.val}
                       type="button"
                       onClick={() => set('everDiagnosedPCOD', opt.val)}
-                      className={`py-2.5 px-4 rounded-xl border text-sm font-medium transition-all ${
-                        form.everDiagnosedPCOD === opt.val
-                          ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
-                          : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50'
-                      }`}
+                      className={`py-2.5 px-4 rounded-xl border text-sm font-medium transition-all ${form.everDiagnosedPCOD === opt.val
+                        ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
+                        : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50'
+                        }`}
                     >
                       {opt.label}
                     </button>
@@ -417,17 +441,16 @@ const handleSubmit = async () => {
                 <label className="block text-sm font-medium text-[#1A1A2E] mb-3">Sleep quality</label>
                 <div className="flex gap-2">
                   {[
-                    { val: 'poor',      label: '😴 Poor' },
-                    { val: 'okay',      label: '😐 Okay' },
-                    { val: 'good',      label: '😊 Good' },
+                    { val: 'poor', label: '😴 Poor' },
+                    { val: 'okay', label: '😐 Okay' },
+                    { val: 'good', label: '😊 Good' },
                     { val: 'excellent', label: '✨ Excellent' },
                   ].map(opt => (
                     <button key={opt.val} type="button" onClick={() => set('sleepQuality', opt.val)}
-                      className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${
-                        form.sleepQuality === opt.val
-                          ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
-                          : 'border-[#EEECF5] text-[#6B6B8A]'
-                      }`}>
+                      className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${form.sleepQuality === opt.val
+                        ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
+                        : 'border-[#EEECF5] text-[#6B6B8A]'
+                        }`}>
                       {opt.label}
                     </button>
                   ))}
@@ -469,17 +492,16 @@ const handleSubmit = async () => {
                   <div className="space-y-1.5">
                     {[
                       { val: 'none', label: 'None' },
-                      { val: '1-2',  label: '1–2 times' },
-                      { val: '2-3',  label: '2–3 times' },
-                      { val: '4-5',  label: '4–5 times' },
-                      { val: 'daily',label: 'Daily' },
+                      { val: '1-2', label: '1–2 times' },
+                      { val: '2-3', label: '2–3 times' },
+                      { val: '4-5', label: '4–5 times' },
+                      { val: 'daily', label: 'Daily' },
                     ].map(opt => (
                       <button key={opt.val} type="button" onClick={() => set('exerciseFrequency', opt.val)}
-                        className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${
-                          form.exerciseFrequency === opt.val
-                            ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E] font-medium'
-                            : 'border-[#EEECF5] text-[#6B6B8A]'
-                        }`}>
+                        className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${form.exerciseFrequency === opt.val
+                          ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E] font-medium'
+                          : 'border-[#EEECF5] text-[#6B6B8A]'
+                          }`}>
                         {opt.label}
                       </button>
                     ))}
@@ -492,16 +514,15 @@ const handleSubmit = async () => {
                   </label>
                   <div className="space-y-1.5">
                     {[
-                      { val: 'low',    label: 'Low — I avoid sugar' },
+                      { val: 'low', label: 'Low — I avoid sugar' },
                       { val: 'medium', label: 'Medium — occasionally' },
-                      { val: 'high',   label: 'High — most days' },
+                      { val: 'high', label: 'High — most days' },
                     ].map(opt => (
                       <button key={opt.val} type="button" onClick={() => set('sugarIntake', opt.val)}
-                        className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${
-                          form.sugarIntake === opt.val
-                            ? 'border-[#E8A598] bg-[#FDECEA] text-[#1E1B5E] font-medium'
-                            : 'border-[#EEECF5] text-[#6B6B8A]'
-                        }`}>
+                        className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${form.sugarIntake === opt.val
+                          ? 'border-[#E8A598] bg-[#FDECEA] text-[#1E1B5E] font-medium'
+                          : 'border-[#EEECF5] text-[#6B6B8A]'
+                          }`}>
                         {opt.label}
                       </button>
                     ))}
@@ -525,11 +546,10 @@ const handleSubmit = async () => {
                       key={key}
                       type="button"
                       onClick={() => toggleSymptom(key)}
-                      className={`flex items-center gap-2 py-2.5 px-3 rounded-xl border text-sm text-left transition-all ${
-                        selected
-                          ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E] font-medium'
-                          : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50'
-                      } ${key === 'none' ? 'col-span-2' : ''}`}
+                      className={`flex items-center gap-2 py-2.5 px-3 rounded-xl border text-sm text-left transition-all ${selected
+                        ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E] font-medium'
+                        : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50'
+                        } ${key === 'none' ? 'col-span-2' : ''}`}
                     >
                       <span className="text-base">{icon}</span>
                       <span className="flex-1">{label}</span>
@@ -562,11 +582,10 @@ const handleSubmit = async () => {
                 <div className="flex gap-2">
                   {MOOD_OPTIONS.map(m => (
                     <button key={m} type="button" onClick={() => set('recentMoodTrend', m.toLowerCase())}
-                      className={`flex-1 py-2 rounded-xl border text-xs font-medium transition-all ${
-                        form.recentMoodTrend === m.toLowerCase()
-                          ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
-                          : 'border-[#EEECF5] text-[#6B6B8A]'
-                      }`}>
+                      className={`flex-1 py-2 rounded-xl border text-xs font-medium transition-all ${form.recentMoodTrend === m.toLowerCase()
+                        ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
+                        : 'border-[#EEECF5] text-[#6B6B8A]'
+                        }`}>
                       {m}
                     </button>
                   ))}
@@ -580,15 +599,14 @@ const handleSubmit = async () => {
                 <div className="flex gap-2">
                   {[
                     { val: 'declining', label: '📉 Getting worse' },
-                    { val: 'stable',    label: '➡️ Stable' },
+                    { val: 'stable', label: '➡️ Stable' },
                     { val: 'improving', label: '📈 Improving' },
                   ].map(opt => (
                     <button key={opt.val} type="button" onClick={() => set('recentSleepTrend', opt.val)}
-                      className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${
-                        form.recentSleepTrend === opt.val
-                          ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
-                          : 'border-[#EEECF5] text-[#6B6B8A]'
-                      }`}>
+                      className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${form.recentSleepTrend === opt.val
+                        ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
+                        : 'border-[#EEECF5] text-[#6B6B8A]'
+                        }`}>
                       {opt.label}
                     </button>
                   ))}
@@ -602,15 +620,14 @@ const handleSubmit = async () => {
                 <div className="flex gap-2">
                   {[
                     { val: 'declining', label: '📉 More stressed' },
-                    { val: 'stable',    label: '➡️ Stable' },
+                    { val: 'stable', label: '➡️ Stable' },
                     { val: 'improving', label: '📈 Less stressed' },
                   ].map(opt => (
                     <button key={opt.val} type="button" onClick={() => set('recentStressTrend', opt.val)}
-                      className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${
-                        form.recentStressTrend === opt.val
-                          ? 'border-[#E8A598] bg-[#FDECEA] text-[#1E1B5E]'
-                          : 'border-[#EEECF5] text-[#6B6B8A]'
-                      }`}>
+                      className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${form.recentStressTrend === opt.val
+                        ? 'border-[#E8A598] bg-[#FDECEA] text-[#1E1B5E]'
+                        : 'border-[#EEECF5] text-[#6B6B8A]'
+                        }`}>
                       {opt.label}
                     </button>
                   ))}

@@ -15,10 +15,10 @@ function getCyclePhase(lastPeriodDate, avgCycleLength = 28) {
   const daysSince = Math.floor((today - last) / (1000 * 60 * 60 * 24))
   const cycleDay = (daysSince % avgCycleLength) + 1
 
-  if (cycleDay <= 5)  return { phase: 'Menstrual',   day: cycleDay, emoji: '🌑', color: '#E8A598' }
-  if (cycleDay <= 13) return { phase: 'Follicular',  day: cycleDay, emoji: '🌱', color: '#7EC8A4' }
-  if (cycleDay <= 16) return { phase: 'Ovulatory',   day: cycleDay, emoji: '🌕', color: '#F5C16C' }
-  return                       { phase: 'Luteal',     day: cycleDay, emoji: '🌖', color: '#9B8EC4' }
+  if (cycleDay <= 5) return { phase: 'Menstrual', day: cycleDay, emoji: '🌑', color: '#E8A598' }
+  if (cycleDay <= 13) return { phase: 'Follicular', day: cycleDay, emoji: '🌱', color: '#7EC8A4' }
+  if (cycleDay <= 16) return { phase: 'Ovulatory', day: cycleDay, emoji: '🌕', color: '#F5C16C' }
+  return { phase: 'Luteal', day: cycleDay, emoji: '🌖', color: '#9B8EC4' }
 }
 
 function daysUntilNextPeriod(lastPeriodDate, avgCycleLength = 28) {
@@ -35,53 +35,23 @@ function daysUntilNextPeriod(lastPeriodDate, avgCycleLength = 28) {
 }
 
 // ── Demo data ────────────────────────────────────────────────────────────────
-const DEMO_PROFILE = {
-  name: 'Anaya',
-  ageRange: '18-24',
-  age: 22,
-  goal: 'manage_pcod',
-  cycleVariation: 'irregular',
-  avgCycleLength: 32,
-  avgPeriodDuration: 5,
-  typicalFlow: 'medium',
-  lastPeriodDate: new Date(Date.now() - 6 * 86400000).toISOString().split('T')[0],
-  everDiagnosedPCOD: 'suspected',
-  avgSleepHours: 7,
-  avgStressLevel: 6,
-  avgWaterIntake: 6,
-  exerciseFrequency: '2-3',
-  sugarIntake: 'medium',
-  symptoms: ['irregularPeriods', 'acne', 'fatigue'],
-  stats: {
-    daysLogged: 14,
-    currentStreak: 7,
-    consistencyPct: 78,
-    totalInsights: 23,
-  }
-}
-
 export default function ProfilePage() {
   const navigate = useNavigate()
   const userId = localStorage.getItem('hormonaUserId')
-  const isDemo = localStorage.getItem('hormonaIsDemo') === 'true'
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [editForm, setEditForm] = useState({})
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   useEffect(() => {
-    if (isDemo) {
-      setProfile(DEMO_PROFILE)
-      setLoading(false)
-      return
-    }
-
     Promise.all([
       axios.get(`/api/users/${userId}`).catch(() => null),
       axios.get(`/api/logs/${userId}`).catch(() => null),
     ]).then(([userRes, logsRes]) => {
-      const u    = userRes?.data
+      const u = userRes?.data
       const logs = logsRes?.data || []
 
       if (!u) {
@@ -133,14 +103,18 @@ export default function ProfilePage() {
 
   const saveEdit = async () => {
     setSaving(true)
+    setSaveError('')
     try {
-      await axios.put(`/api/users/${userId}`, editForm)
-      setProfile({ ...profile, ...editForm })
-    } catch {
-      setProfile({ ...profile, ...editForm }) // update locally even if backend fails
+      const res = await axios.put(`/api/users/${userId}`, editForm)
+      setProfile({ ...profile, ...res.data })
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+      setEditing(false)
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Unable to save changes. Please check your connection.'
+      setSaveError(msg)
     } finally {
       setSaving(false)
-      setEditing(false)
     }
   }
 
@@ -168,14 +142,46 @@ export default function ProfilePage() {
   const nextPeriod = daysUntilNextPeriod(p.lastPeriodDate, p.avgCycleLength)
 
   const STAT_CARDS = [
-    { label: 'Days Logged',   value: p.stats?.daysLogged || 0,        icon: Calendar,   color: '#7EC8A4', bg: '#E8F5EF' },
-    { label: 'Day Streak',    value: `${p.stats?.currentStreak || 0}🔥`, icon: Flame,    color: '#E8A598', bg: '#FDECEA' },
-    { label: 'Consistency',   value: `${p.stats?.consistencyPct || 0}%`, icon: Target,   color: '#1E1B5E', bg: '#EDE9F8' },
-    { label: 'Insights Got',  value: p.stats?.totalInsights || 0,     icon: Sparkles,   color: '#F5C16C', bg: '#FEF9EC' },
+    { label: 'Days Logged', value: p.stats?.daysLogged || 0, icon: Calendar, color: '#7EC8A4', bg: '#E8F5EF' },
+    { label: 'Day Streak', value: `${p.stats?.currentStreak || 0}🔥`, icon: Flame, color: '#E8A598', bg: '#FDECEA' },
+    { label: 'Consistency', value: `${p.stats?.consistencyPct || 0}%`, icon: Target, color: '#1E1B5E', bg: '#EDE9F8' },
+    { label: 'Insights Got', value: p.stats?.totalInsights || 0, icon: Sparkles, color: '#F5C16C', bg: '#FEF9EC' },
   ]
 
   return (
     <div className="space-y-6 p-6">
+
+      {/* Onboarding incomplete banner */}
+      {!profile.onboardingComplete && (
+        <div className="bg-[#EDE9F8] border border-[#9B8EC4]/30 rounded-xl px-4 py-3 flex items-center gap-3">
+          <AlertCircle size={16} className="text-[#9B8EC4] flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-[#1E1B5E]">Complete your onboarding</p>
+            <p className="text-xs text-[#6B6B8A]">Your health baseline will be more accurate once you finish setup.</p>
+          </div>
+          <button
+            onClick={() => navigate('/onboarding')}
+            className="text-xs font-semibold text-white bg-[#7EC8A4] px-3 py-1.5 rounded-lg hover:bg-[#6ab890] transition-all flex-shrink-0"
+          >
+            Finish Setup
+          </button>
+        </div>
+      )}
+
+      {/* Save success */}
+      {saveSuccess && (
+        <div className="bg-[#E8F5EF] text-[#1E1B5E] text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+          <span className="text-[#7EC8A4]">✓</span> Profile updated successfully!
+        </div>
+      )}
+
+      {/* Save error */}
+      {saveError && (
+        <div className="bg-[#FDECEA] text-[#E8A598] text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+          <AlertCircle size={15} /> {saveError}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -274,9 +280,9 @@ export default function ProfilePage() {
           <div className="space-y-3">
             {[
               { label: 'Avg cycle length', value: `${editing ? editForm.avgCycleLength : p.avgCycleLength} days`, editKey: 'avgCycleLength', type: 'range', min: 21, max: 45 },
-              { label: 'Period duration',  value: `${editing ? editForm.avgPeriodDuration : p.avgPeriodDuration} days`, editKey: 'avgPeriodDuration', type: 'range', min: 2, max: 10 },
-              { label: 'Last period',      value: p.lastPeriodDate ? new Date(p.lastPeriodDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—' },
-              { label: 'Next period',      value: nextPeriod ? `~${nextPeriod.date} (${nextPeriod.days} days)` : '—', highlight: true },
+              { label: 'Period duration', value: `${editing ? editForm.avgPeriodDuration : p.avgPeriodDuration} days`, editKey: 'avgPeriodDuration', type: 'range', min: 2, max: 10 },
+              { label: 'Last period', value: p.lastPeriodDate ? new Date(p.lastPeriodDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—' },
+              { label: 'Next period', value: nextPeriod ? `~${nextPeriod.date} (${nextPeriod.days} days)` : '—', highlight: true },
               { label: 'Cycle regularity', value: { regular: 'Very regular', slightly: 'Slightly irregular', irregular: 'Irregular', very_irregular: 'Very irregular' }[p.cycleVariation] || '—' },
             ].map(item => (
               <div key={item.label}>
@@ -373,7 +379,7 @@ export default function ProfilePage() {
                     onChange={e => setEditForm(f => ({ ...f, exerciseFrequency: e.target.value }))}
                     className="border border-[#EEECF5] rounded-lg px-2 py-1 text-xs text-[#1E1B5E] focus:outline-none"
                   >
-                    {[['none','None'],['1-2','1–2×/week'],['2-3','2–3×/week'],['4-5','4–5×/week'],['daily','Daily']].map(([v,l]) => (
+                    {[['none', 'None'], ['1-2', '1–2×/week'], ['2-3', '2–3×/week'], ['4-5', '4–5×/week'], ['daily', 'Daily']].map(([v, l]) => (
                       <option key={v} value={v}>{l}</option>
                     ))}
                   </select>
@@ -391,16 +397,15 @@ export default function ProfilePage() {
                     onChange={e => setEditForm(f => ({ ...f, sugarIntake: e.target.value }))}
                     className="border border-[#EEECF5] rounded-lg px-2 py-1 text-xs text-[#1E1B5E] focus:outline-none"
                   >
-                    {[['low','Low'],['medium','Medium'],['high','High']].map(([v,l]) => (
+                    {[['low', 'Low'], ['medium', 'Medium'], ['high', 'High']].map(([v, l]) => (
                       <option key={v} value={v}>{l}</option>
                     ))}
                   </select>
                 ) : (
-                  <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${
-                    p.sugarIntake === 'low' ? 'bg-[#E8F5EF] text-[#7EC8A4]' :
-                    p.sugarIntake === 'high' ? 'bg-[#FDECEA] text-[#E8A598]' :
-                    'bg-[#FAF8F5] text-[#6B6B8A]'
-                  }`}>
+                  <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${p.sugarIntake === 'low' ? 'bg-[#E8F5EF] text-[#7EC8A4]' :
+                      p.sugarIntake === 'high' ? 'bg-[#FDECEA] text-[#E8A598]' :
+                        'bg-[#FAF8F5] text-[#6B6B8A]'
+                    }`}>
                     {p.sugarIntake?.charAt(0).toUpperCase() + p.sugarIntake?.slice(1) || '—'}
                   </span>
                 )}

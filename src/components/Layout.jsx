@@ -15,27 +15,27 @@ import {
 import { useState, useEffect } from 'react'
 
 const navItems = [
-  { to: '/dashboard', label: 'Dashboard',      icon: LayoutDashboard },
-  { to: '/log',       label: 'Log Data',        icon: ClipboardList },
-  { to: '/insights',  label: 'Insights',        icon: Lightbulb },
-  { to: '/simulate',  label: 'Risk Simulator',  icon: Brain },
-  { to: '/profile',   label: 'Profile',         icon: User },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/log', label: 'Log Data', icon: ClipboardList },
+  { to: '/insights', label: 'Insights', icon: Lightbulb },
+  { to: '/simulate', label: 'Risk Simulator', icon: Brain },
+  { to: '/profile', label: 'Profile', icon: User },
 ]
 
 // Phase-based daily tips shown at the bottom of the sidebar
 const PHASE_TIPS = {
-  menstrual:  { tip: 'Rest is productive today. Gentle movement supports your body.',   phase: 'Menstrual Phase',   emoji: '🌑' },
-  follicular: { tip: 'Energy is rising — great time to start new healthy habits.',      phase: 'Follicular Phase',  emoji: '🌱' },
-  ovulatory:  { tip: 'Peak energy and clarity. Make the most of it!',                  phase: 'Ovulatory Phase',   emoji: '🌕' },
-  luteal:     { tip: 'Prioritise sleep and reduce sugar for hormonal balance.',         phase: 'Luteal Phase',      emoji: '🌖' },
-  default:    { tip: 'Log your data daily to unlock personalised cycle insights.',      phase: 'Your Cycle',        emoji: '🌿' },
+  menstrual: { tip: 'Rest is productive today. Gentle movement supports your body.', phase: 'Menstrual Phase', emoji: '🌑' },
+  follicular: { tip: 'Energy is rising — great time to start new healthy habits.', phase: 'Follicular Phase', emoji: '🌱' },
+  ovulatory: { tip: 'Peak energy and clarity. Make the most of it!', phase: 'Ovulatory Phase', emoji: '🌕' },
+  luteal: { tip: 'Prioritise sleep and reduce sugar for hormonal balance.', phase: 'Luteal Phase', emoji: '🌖' },
+  default: { tip: 'Log your data daily to unlock personalised cycle insights.', phase: 'Your Cycle', emoji: '🌿' },
 }
 
 function getDailyTip(lastPeriodDate, avgCycleLength = 28) {
   if (!lastPeriodDate) return PHASE_TIPS.default
   const daysSince = Math.floor((Date.now() - new Date(lastPeriodDate)) / 86400000)
   const cycleDay = (daysSince % avgCycleLength) + 1
-  if (cycleDay <= 5)  return PHASE_TIPS.menstrual
+  if (cycleDay <= 5) return PHASE_TIPS.menstrual
   if (cycleDay <= 13) return PHASE_TIPS.follicular
   if (cycleDay <= 16) return PHASE_TIPS.ovulatory
   return PHASE_TIPS.luteal
@@ -52,28 +52,30 @@ export default function Layout() {
     const storedName = localStorage.getItem('hormonaUserName')
     const storedUserId = localStorage.getItem('hormonaUserId')
 
-    if (storedName) {
-      setUserName(storedName)
-    } else if (storedUserId === 'demo_user_id') {
-      setUserName('Anaya')
-    } else {
-      setUserName('Guest')
-    }
+    setUserName(storedName || 'there')
     setLoading(false)
 
-    // Compute daily tip from stored profile data (if available)
-    try {
-      const lastPeriod = localStorage.getItem('hormonaLastPeriod')
-      const cycleLen = parseInt(localStorage.getItem('hormonaCycleLength') || '28')
-      if (lastPeriod) setTip(getDailyTip(lastPeriod, cycleLen))
-    } catch {
-      // Use default tip
+    // Fetch real user profile to compute today's cycle phase tip
+    if (storedUserId) {
+      import('axios').then(({ default: axios }) => {
+        axios.get(`/api/users/${storedUserId}`)
+          .then(res => {
+            const u = res.data
+            if (u.lastPeriodDate) {
+              setTip(getDailyTip(u.lastPeriodDate, u.avgCycleLength || 28))
+            }
+          })
+          .catch(() => {
+            // Keep default tip on failure
+          })
+      })
     }
   }, [])
 
   const handleSignOut = () => {
     localStorage.removeItem('hormonaUserId')
     localStorage.removeItem('hormonaUserName')
+    localStorage.removeItem('hormonaIsDemo')
     localStorage.removeItem('hormonaLastPeriod')
     localStorage.removeItem('hormonaCycleLength')
     navigate('/login')
@@ -115,10 +117,9 @@ export default function Layout() {
             to={to}
             onClick={onLinkClick}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                isActive
-                  ? 'text-white shadow-md'
-                  : 'text-white/65 hover:text-white hover:bg-white/10'
+              `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
+                ? 'text-white shadow-md'
+                : 'text-white/65 hover:text-white hover:bg-white/10'
               }`
             }
             style={({ isActive }) => ({
@@ -191,9 +192,8 @@ export default function Layout() {
 
       {/* ── Mobile sidebar ── */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 z-40 flex flex-col transform transition-transform duration-300 md:hidden ${
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 h-full w-64 z-40 flex flex-col transform transition-transform duration-300 md:hidden ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
         style={{ backgroundColor: '#1E1B5E' }}
       >
         <SidebarContent onLinkClick={() => setMobileMenuOpen(false)} />

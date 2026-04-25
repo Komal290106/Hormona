@@ -12,39 +12,44 @@ export default function LoginPage() {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
- const handleSubmit = async (e) => {
-  e.preventDefault()
-  if (!form.email || !form.password) {
-    setError('Please fill in all fields.')
-    return
-  }
-  try {
-    setLoading(true)
-    setError('')
-    const res = await axios.post('/api/users/login', form)
-    localStorage.setItem('hormonaUserId', res.data._id)
-    localStorage.setItem('hormonaUserName', res.data.name)
-    
-    // Check if user has completed onboarding
-    const onboardingComplete = localStorage.getItem('hormonaOnboardingComplete') === 'true'
-    if (!onboardingComplete && !res.data.onboardingComplete) {
-      navigate('/onboarding')
-    } else {
-      navigate('/dashboard')
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!form.email || !form.password) {
+      setError('Please fill in all fields.')
+      return
     }
-  } catch (err) {
-    const msg = err.response?.data?.message
-    setError(msg || 'Invalid email or password. Please try again.')
-  } finally {
-    setLoading(false)
-  }
-}
+    try {
+      setLoading(true)
+      setError('')
+      const res = await axios.post('/api/users/login', form)
+      localStorage.setItem('hormonaUserId', res.data._id)
+      localStorage.setItem('hormonaUserName', res.data.name)
 
-  // Demo shortcut — loads Anaya's pre-seeded data
-  const handleDemoLogin = () => {
-    localStorage.setItem('hormonaUserId', 'demo_user_id')
-    localStorage.setItem('hormonaUserName', 'Anaya')
-    navigate('/dashboard')
+      // Check if user has completed onboarding
+      const onboardingComplete = localStorage.getItem('hormonaOnboardingComplete') === 'true'
+      if (!onboardingComplete && !res.data.onboardingComplete) {
+        navigate('/onboarding')
+      } else {
+        navigate('/dashboard')
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message
+      setError(msg || 'Invalid email or password. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Demo shortcut — fetches real Anaya from backend
+  const handleDemoLogin = async () => {
+    try {
+      const res = await axios.get('/api/users/demo')
+      localStorage.setItem('hormonaUserId', res.data._id)
+      localStorage.setItem('hormonaUserName', res.data.name)
+      navigate('/dashboard')
+    } catch {
+      setError('Backend not running. Start with: cd server && npm run dev')
+    }
   }
 
   return (

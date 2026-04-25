@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import {
   Activity,
   AlertTriangle,
@@ -31,11 +32,17 @@ import {
 export default function LandingPage() {
   const navigate = useNavigate()
 
-  const handleDemo = () => {
-    // Set demo user — dashboard has built-in fallback data for Anaya
-    localStorage.setItem('hormonaUserId', 'demo_user_id')
-    localStorage.setItem('hormonaUserName', 'Anaya')
-    localStorage.setItem('hormonaIsDemo', 'true')
+  const handleDemo = async () => {
+    try {
+      // Fetch the real seeded Anaya user from backend
+      const res = await axios.get('/api/users/demo')
+      localStorage.setItem('hormonaUserId', res.data._id)
+      localStorage.setItem('hormonaUserName', res.data.name)
+    } catch {
+      // If backend not running, alert — no fake fallback
+      alert('Backend is not running. Please start the server with: cd server && npm run dev')
+      return
+    }
     navigate('/dashboard')
   }
 
