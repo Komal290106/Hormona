@@ -12,6 +12,6 @@ const DailyLogSchema = new mongoose.Schema({
   mood: { type: String, enum: ['great', 'good', 'okay', 'low', 'bad'], default: 'okay' },
   symptoms: { type: [String], default: [] },
   notes: { type: String, default: '' },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('DailyLog', DailyLogSchema);

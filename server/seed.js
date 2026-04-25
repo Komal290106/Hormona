@@ -93,8 +93,6 @@ async function seedAnaya() {
 
     await DailyLog.insertMany(logs);
     console.log(`✅ Created ${logs.length} daily logs for Anaya`);
-    console.log('\n📌 NEXT STEP — paste this ID into LandingPage.jsx and LoginPage.jsx:');
-    console.log(`   ANAYA_ID = '${anaya._id.toString()}'`);
     console.log('\n🚀 Done! Run: npm run dev\n');
 
     await mongoose.disconnect();

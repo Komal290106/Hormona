@@ -6,24 +6,15 @@ const { calcStabilityScore, calcPCODRisk, getCyclePhase, calcCycleRegularity } =
 // ── POST /api/logs ─────────────────────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
-    const log = new DailyLog(req.body);
+    const { userId, date, sleepHours, stressLevel, hydration, sugarIntake, cycleStatus, flow, mood, symptoms, notes } = req.body;
+    if (!userId) return res.status(400).json({ error: 'userId is required.' });
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    const log = new DailyLog({ userId, date, sleepHours, stressLevel, hydration, sugarIntake, cycleStatus, flow, mood, symptoms, notes });
     await log.save();
-    res.json(log);
+    res.status(201).json(log);
   } catch (err) {
     res.status(400).json({ error: err.message });
-  }
-});
-
-// ── GET /api/logs/:userId ──────────────────────────────────────────────────
-// Returns last 90 days of logs for a user
-router.get('/:userId', async (req, res) => {
-  try {
-    const logs = await DailyLog.find({ userId: req.params.userId })
-      .sort({ date: -1 })
-      .limit(90);
-    res.json(logs);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
   }
 });
 
@@ -228,6 +219,19 @@ router.get('/:userId/calendar', async (req, res) => {
     });
 
     res.json({ calendar: byDate, totalLogs: logs.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── GET /api/logs/:userId ──────────────────────────────────────────────────
+// Returns last 90 days of logs for a user (must be after specific routes)
+router.get('/:userId', async (req, res) => {
+  try {
+    const logs = await DailyLog.find({ userId: req.params.userId })
+      .sort({ date: -1 })
+      .limit(90);
+    res.json(logs);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
