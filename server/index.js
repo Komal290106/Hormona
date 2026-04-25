@@ -30,6 +30,7 @@ app.use(express.json());
 app.use('/api/users', require('./routes/users'));
 app.use('/api/logs',  require('./routes/logs'));
 app.use('/api/simulate', require('./routes/simulate'));
+app.use('/api/chat', require('./routes/chat'));
 
 // ── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
