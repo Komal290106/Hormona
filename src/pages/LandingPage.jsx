@@ -6,6 +6,7 @@ import {
   Flame, Heart, ChartLine as LineChart, Lock, Shield,
   Sparkles, Target, TrendingUp, Users, Zap
 } from 'lucide-react'
+import logo from '../assets/logo.png'
 
 export default function LandingPage() {
   const navigate = useNavigate()
@@ -27,9 +28,8 @@ export default function LandingPage() {
     <div className="min-h-screen" style={{ backgroundColor: '#FAF8F5' }}>
       {/* NAVBAR */}
       <nav className="flex justify-between items-center px-8 py-5 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-          <Heart style={{ color: '#7EC8A4' }} size={28} fill="#7EC8A4" />
-          <span className="text-2xl font-bold" style={{ color: '#1E1B5E' }}>Hormona</span>
+        <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+          <img src={logo} alt="Hormona" className="h-10 w-auto" />
         </div>
         <button
           onClick={handleStart}

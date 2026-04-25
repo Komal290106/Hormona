@@ -6,11 +6,11 @@ import {
   Brain,
   User,
   LogOut,
-  Heart,
   Menu,
   X,
   Leaf,
 } from 'lucide-react'
+import logo from '../assets/logo.png'
 import { useState, useEffect } from 'react'
 import ChatBot from './ChatBot'
 
@@ -88,11 +88,7 @@ export default function Layout() {
         style={{ borderColor: 'rgba(255,255,255,0.1)' }}
         onClick={() => { navigate('/'); if (onLinkClick) onLinkClick() }}
       >
-        <div className="flex items-center gap-2 mb-1">
-          <Heart size={26} style={{ color: '#7EC8A4' }} fill="#7EC8A4" />
-          <h1 className="text-white font-bold text-2xl tracking-tight">HORMONA</h1>
-        </div>
-        <p className="text-xs" style={{ color: '#7EC8A4' }}>Understand. Balance. Thrive.</p>
+        <img src={logo} alt="Hormona" className="h-10 w-auto" />
       </div>
 
       {/* User card */}
