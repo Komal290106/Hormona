@@ -92,3 +92,62 @@
 .stagger-children>*:nth-child(4) {
   animation-delay: 0.3s;
 }
+
+/* Range slider track fix for WebKit (Chrome, Safari) */
+input[type='range'].slider-current {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: #DDDAE8;
+  outline: none;
+}
+input[type='range'].slider-current::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #1E1B5E;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(30,27,94,0.3);
+  border: 2px solid #fff;
+}
+input[type='range'].slider-current::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #1E1B5E;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(30,27,94,0.3);
+}
+
+input[type='range'].slider-target {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: #C8E9D8;
+  outline: none;
+}
+input[type='range'].slider-target::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #7EC8A4;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(126,200,164,0.4);
+  border: 2px solid #fff;
+}
+input[type='range'].slider-target::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #7EC8A4;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(126,200,164,0.4);
+}
