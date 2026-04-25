@@ -10,18 +10,18 @@ import RiskSimulatorPage from './pages/RiskSimulatorPage'
 import InsightsPage from './pages/InsightsPage'
 import ProfilePage from './pages/ProfilePage'
 
-// Simple auth guard — checks localStorage for a userId
 function RequireAuth({ children }) {
   const userId = localStorage.getItem('hormonaUserId')
   if (!userId) return <Navigate to="/login" replace />
   return children
 }
 
-// Onboarding guard — needs a userId (from signup) but not full auth
-// Demo users bypass onboarding and go straight to dashboard
 function RequireUserId({ children }) {
   const userId = localStorage.getItem('hormonaUserId')
   if (!userId) return <Navigate to="/signup" replace />
+  if (localStorage.getItem('hormonaOnboardingComplete') === 'true') {
+    return <Navigate to="/dashboard" replace />
+  }
   return children
 }
 

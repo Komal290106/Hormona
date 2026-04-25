@@ -13,6 +13,7 @@ import {
   Leaf,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import api from '../lib/api'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -57,18 +58,16 @@ export default function Layout() {
 
     // Fetch real user profile to compute today's cycle phase tip
     if (storedUserId) {
-      import('axios').then(({ default: axios }) => {
-        axios.get(`/api/users/${storedUserId}`)
-          .then(res => {
-            const u = res.data
-            if (u.lastPeriodDate) {
-              setTip(getDailyTip(u.lastPeriodDate, u.avgCycleLength || 28))
-            }
-          })
-          .catch(() => {
-            // Keep default tip on failure
-          })
-      })
+      api.get(`/users/${storedUserId}`)
+        .then(res => {
+          const u = res.data
+          if (u.lastPeriodDate) {
+            setTip(getDailyTip(u.lastPeriodDate, u.avgCycleLength || 28))
+          }
+        })
+        .catch(() => {
+          // Keep default tip on failure
+        })
     }
   }, [])
 

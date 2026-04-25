@@ -1,46 +1,20 @@
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import {
-  Activity,
-  AlertTriangle,
-  ArrowRight,
-  BarChart3,
-  Bell,
-  BookOpen,
-  Brain,
-  Calendar,
-  CheckCircle2,
-  ChevronRight,
-  Droplet,
-  Eye,
-  Flame,
-  Heart,
-  LineChart,
-  Lock,
-  LogIn,
-  Moon,
-  Shield,
-  Sparkles,
-  Star,
-  Sun,
-  Target,
-  TrendingUp,
-  Users,
-  Zap
-} from 'lucide-react'
+import api from '../lib/api'
+import { Activity, TriangleAlert as AlertTriangle, ArrowRight, ChartBar as BarChart3, Bell, BookOpen, Brain, Calendar, CircleCheck as CheckCircle2, ChevronRight, Droplet, Eye, Flame, Heart, ChartLine as LineChart, Lock, LogIn, Moon, Shield, Sparkles, Star, Sun, Target, TrendingUp, Users, Zap } from 'lucide-react'
 
 export default function LandingPage() {
   const navigate = useNavigate()
 
   const handleDemo = async () => {
     try {
-      // Fetch the real seeded Anaya user from backend
-      const res = await axios.get('/api/users/demo')
+      const res = await api.get('/users/demo')
       localStorage.setItem('hormonaUserId', res.data._id)
       localStorage.setItem('hormonaUserName', res.data.name)
+      if (res.data.onboardingComplete) {
+        localStorage.setItem('hormonaOnboardingComplete', 'true')
+      }
     } catch {
-      // If backend not running, alert — no fake fallback
-      alert('Backend is not running. Please start the server with: cd server && npm run dev')
+      alert('Could not connect to the server. Please check your connection and try again.')
       return
     }
     navigate('/dashboard')

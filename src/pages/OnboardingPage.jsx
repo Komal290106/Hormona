@@ -1,11 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import {
-  Heart, ChevronRight, ChevronLeft, Check,
-  Moon, Droplet, Flame, Apple, Activity,
-  AlertCircle, Calendar, Sparkles
-} from 'lucide-react'
+import api from '../lib/api'
+import { Heart, ChevronRight, ChevronLeft, Check, Moon, Droplet, Flame, Apple, Activity, CircleAlert as AlertCircle, Calendar, Sparkles } from 'lucide-react'
 
 // ─── Step definitions ───────────────────────────────────────────────────────
 const STEPS = [
@@ -100,7 +96,6 @@ export default function OnboardingPage() {
   }
 
   const back = () => { setError(''); setStep(s => s - 1) }
-  // Replace the handleSubmit function in your OnboardingPage.jsx with this:
 
   const handleSubmit = async () => {
     try {
@@ -108,12 +103,10 @@ export default function OnboardingPage() {
       const userId = localStorage.getItem('hormonaUserId')
 
       if (!userId) {
-        console.error('No user ID found')
         navigate('/login')
         return
       }
 
-      // Build payload for backend
       const payload = {
         age: form.age || null,
         ageRange: form.ageRange,
@@ -137,19 +130,16 @@ export default function OnboardingPage() {
         onboardingComplete: true
       }
 
-      // Try to save to backend
       try {
-        await axios.put(`http://localhost:5000/api/users/${userId}/onboarding`, payload)
-        console.log('Onboarding data saved to backend')
+        await api.put(`/users/${userId}/onboarding`, payload)
       } catch (err) {
-        console.warn('Backend not available, saving to localStorage only:', err.message)
+        console.warn('Backend not available, saving locally:', err.message)
       }
 
-      // Save onboarding data to localStorage as backup
+      localStorage.setItem('hormonaOnboardingComplete', 'true')
       localStorage.setItem(`onboarding_${userId}`, 'true')
       localStorage.setItem(`userData_${userId}`, JSON.stringify(payload))
 
-      // Navigate to dashboard
       navigate('/dashboard')
     } catch (err) {
       console.error('Onboarding error:', err)
@@ -158,37 +148,6 @@ export default function OnboardingPage() {
       setLoading(false)
     }
   }
-
-
-  // PUT /api/users/:userId/onboarding - Save onboarding data
-  router.put('/:userId/onboarding', async (req, res) => {
-    try {
-      const { userId } = req.params
-      const onboardingData = req.body
-
-      // Update user with onboarding data
-      const updatedUser = await User.findByIdAndUpdate(
-        userId,
-        {
-          $set: {
-            ...onboardingData,
-            onboardingComplete: true,
-            updatedAt: new Date()
-          }
-        },
-        { new: true }
-      )
-
-      if (!updatedUser) {
-        return res.status(404).json({ error: 'User not found' })
-      }
-
-      res.json({ success: true, user: updatedUser })
-    } catch (err) {
-      console.error('Onboarding save error:', err)
-      res.status(500).json({ error: err.message })
-    }
-  })
 
   // ─── Progress bar ─────────────────────────────────────────────────────────
   const progress = ((step - 1) / (STEPS.length - 1)) * 100

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Heart, Eye, EyeOff, ArrowRight, Sparkles } from 'lucide-react'
-import axios from 'axios'
+import api from '../lib/api'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -21,16 +21,15 @@ export default function LoginPage() {
     try {
       setLoading(true)
       setError('')
-      const res = await axios.post('/api/users/login', form)
+      const res = await api.post('/users/login', form)
       localStorage.setItem('hormonaUserId', res.data._id)
       localStorage.setItem('hormonaUserName', res.data.name)
 
-      // Check if user has completed onboarding
-      const onboardingComplete = localStorage.getItem('hormonaOnboardingComplete') === 'true'
-      if (!onboardingComplete && !res.data.onboardingComplete) {
-        navigate('/onboarding')
-      } else {
+      if (res.data.onboardingComplete) {
+        localStorage.setItem('hormonaOnboardingComplete', 'true')
         navigate('/dashboard')
+      } else {
+        navigate('/onboarding')
       }
     } catch (err) {
       const msg = err.response?.data?.message
@@ -43,12 +42,15 @@ export default function LoginPage() {
   // Demo shortcut — fetches real Anaya from backend
   const handleDemoLogin = async () => {
     try {
-      const res = await axios.get('/api/users/demo')
+      const res = await api.get('/users/demo')
       localStorage.setItem('hormonaUserId', res.data._id)
       localStorage.setItem('hormonaUserName', res.data.name)
+      if (res.data.onboardingComplete) {
+        localStorage.setItem('hormonaOnboardingComplete', 'true')
+      }
       navigate('/dashboard')
     } catch {
-      setError('Backend not running. Start with: cd server && npm run dev')
+      setError('Could not connect to the server. Please check your connection and try again.')
     }
   }
 

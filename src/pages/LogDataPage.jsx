@@ -1,20 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import {
-  Droplet,
-  Moon,
-  Activity,
-  Smile,
-  Award,
-  Clock,
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  Flame,
-  Zap,
-  CheckCircle2
-} from 'lucide-react'
+import api from '../lib/api'
+import { Droplet, Moon, Activity, Smile, Award, Clock, CircleAlert as AlertCircle, ChevronLeft, ChevronRight, Flame, Zap, CircleCheck as CheckCircle2 } from 'lucide-react'
 
 const moodOptions = [
   { value: 'great', label: 'Very Happy', emoji: '😊', color: '#7EC8A4' },
@@ -104,7 +91,7 @@ export default function LogDataPage() {
 
     try {
       setLoading(true)
-      await axios.post('/api/logs', {
+      await api.post('/logs', {
         ...form,
         sugarIntake: form.sugarIntake || 'medium',
         cycleStatus: form.cycleStatus || 'none',
@@ -123,7 +110,7 @@ export default function LogDataPage() {
   const fetchLoggedDates = async () => {
     if (!userId) return
     try {
-      const res = await axios.get(`/api/logs/${userId}`)
+      const res = await api.get(`/logs/${userId}`)
       const dates = res.data.map(log => new Date(log.date).toDateString())
       setLoggedDates(dates)
 

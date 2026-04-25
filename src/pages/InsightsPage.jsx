@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react'
-import {
-  Activity, TrendingUp, TrendingDown, Heart, Moon, Flame, Droplet,
-  Brain, Zap, Calendar, Award, AlertCircle,
-  Sparkles, Target, LineChart, Clock
-} from 'lucide-react'
-import axios from 'axios'
+import { Activity, TrendingUp, TrendingDown, Heart, Moon, Flame, Droplet, Brain, Zap, Calendar, Award, CircleAlert as AlertCircle, Sparkles, Target, ChartLine as LineChart, Clock } from 'lucide-react'
+import api from '../lib/api'
 
 export default function InsightsPage() {
   const userId = localStorage.getItem('hormonaUserId')
@@ -15,7 +11,7 @@ export default function InsightsPage() {
   useEffect(() => {
     if (!userId) return
 
-    axios.get(`/api/logs/${userId}/insights`)
+    api.get(`/logs/${userId}/insights`)
       .then(res => setInsights(res.data))
       .catch(err => setError(err.response?.data?.error || 'Failed to load insights'))
       .finally(() => setLoading(false))

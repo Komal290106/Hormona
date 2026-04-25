@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import {
-  Activity, AlertCircle, Bell, Calendar, ClipboardList,
-  Droplet, Heart, LineChart, Lock, MessageCircle, Moon,
-  Shield, Sparkles, Target, Zap
-} from 'lucide-react'
+import api from '../lib/api'
+import { Activity, CircleAlert as AlertCircle, Bell, Calendar, ClipboardList, Droplet, Heart, ChartLine as LineChart, Lock, MessageCircle, Moon, Shield, Sparkles, Target, Zap } from 'lucide-react'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
@@ -19,9 +15,9 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!userId) { navigate('/login'); return }
 
-    axios.get(`/api/logs/${userId}/dashboard`)
+    api.get(`/logs/${userId}/dashboard`)
       .then(res => setData(res.data))
-      .catch(err => setError(err.response?.data?.error || 'Could not load dashboard. Is the server running?'))
+      .catch(err => setError(err.response?.data?.error || 'Could not load dashboard. Please check your connection.'))
       .finally(() => setLoading(false))
   }, [userId, navigate])
 

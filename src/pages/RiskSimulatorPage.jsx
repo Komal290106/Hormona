@@ -1,22 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import {
-  Moon,
-  Flame,
-  Droplet,
-  TrendingDown,
-  Heart,
-  Zap,
-  AlertCircle,
-  ArrowRight,
-  Target,
-  Activity,
-  Award,
-  Sparkles,
-  BarChart3,
-  Info
-} from 'lucide-react'
+import api from '../lib/api'
+import { Moon, Flame, Droplet, TrendingDown, Heart, Zap, CircleAlert as AlertCircle, ArrowRight, Target, Activity, Award, Sparkles, ChartBar as BarChart3, Info } from 'lucide-react'
 
 export default function RiskSimulatorPage() {
   const navigate = useNavigate()
@@ -53,7 +38,7 @@ export default function RiskSimulatorPage() {
       return
     }
 
-    axios.get(`/api/users/${userId}`)
+    api.get(`/users/${userId}`)
       .then(res => {
         const u = res.data
         const loaded = {

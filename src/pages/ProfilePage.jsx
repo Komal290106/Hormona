@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import {
-  User, Calendar, Activity, Flame, Moon, Droplet,
-  Award, Target, TrendingUp, Edit2, Save, X,
-  Heart, Bell, Shield, ChevronRight, Sparkles, AlertCircle
-} from 'lucide-react'
+import api from '../lib/api'
+import { User, Calendar, Activity, Flame, Moon, Droplet, Award, Target, TrendingUp, CreditCard as Edit2, Save, X, Heart, Bell, Shield, ChevronRight, Sparkles, CircleAlert as AlertCircle } from 'lucide-react'
 
 // ── Phase calculator ────────────────────────────────────────────────────────
 function getCyclePhase(lastPeriodDate, avgCycleLength = 28) {
@@ -48,8 +44,8 @@ export default function ProfilePage() {
 
   useEffect(() => {
     Promise.all([
-      axios.get(`/api/users/${userId}`).catch(() => null),
-      axios.get(`/api/logs/${userId}`).catch(() => null),
+      api.get(`/users/${userId}`).catch(() => null),
+      api.get(`/logs/${userId}`).catch(() => null),
     ]).then(([userRes, logsRes]) => {
       const u = userRes?.data
       const logs = logsRes?.data || []
@@ -105,7 +101,7 @@ export default function ProfilePage() {
     setSaving(true)
     setSaveError('')
     try {
-      const res = await axios.put(`/api/users/${userId}`, editForm)
+      const res = await api.put(`/users/${userId}`, editForm)
       setProfile({ ...profile, ...res.data })
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
@@ -131,7 +127,7 @@ export default function ProfilePage() {
       <div className="flex items-center justify-center h-64 text-center">
         <div>
           <p className="text-lg font-semibold text-[#1E1B5E] mb-2">Profile not found</p>
-          <p className="text-sm text-[#6B6B8A]">Make sure the backend is running and you're logged in.</p>
+          <p className="text-sm text-[#6B6B8A]">Make sure you're logged in and try again.</p>
         </div>
       </div>
     )
@@ -149,7 +145,7 @@ export default function ProfilePage() {
   ]
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
 
       {/* Onboarding incomplete banner */}
       {!profile.onboardingComplete && (
