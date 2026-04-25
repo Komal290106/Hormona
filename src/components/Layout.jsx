@@ -83,7 +83,7 @@ export default function Layout() {
     <>
       {/* Logo */}
       <div
-        className="px-6 pt-8 pb-6 border-b cursor-pointer"
+        className="px-6 pt-8 pb-6 border-b cursor-pointer hover:opacity-80 transition-opacity"
         style={{ borderColor: 'rgba(255,255,255,0.1)' }}
         onClick={() => { navigate('/'); if (onLinkClick) onLinkClick() }}
       >
@@ -172,7 +172,7 @@ export default function Layout() {
 
       {/* Mobile menu button */}
       <button
-        className="fixed top-4 left-4 z-50 p-2 rounded-lg md:hidden shadow-md"
+        className="fixed top-4 left-4 z-50 p-2 rounded-lg md:hidden shadow-md hover:opacity-80 active:scale-95 transition-all"
         style={{ backgroundColor: '#1E1B5E' }}
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
       >

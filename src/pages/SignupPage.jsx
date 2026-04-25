@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Heart, Eye, EyeOff, ArrowRight, CheckCircle } from 'lucide-react'
+import { Heart, Eye, EyeOff, ArrowRight, CircleCheck as CheckCircle } from 'lucide-react'
 import api from '../lib/api'
 
 export default function SignupPage() {
@@ -158,7 +158,7 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6B8A]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6B8A] hover:text-[#1E1B5E] transition-colors"
                 >
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>

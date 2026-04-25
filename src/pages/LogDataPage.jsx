@@ -250,7 +250,7 @@ export default function LogDataPage() {
                     onClick={() => setValue('cycleStatus', val)}
                     className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${form.cycleStatus === val
                       ? 'bg-[#7EC8A4] text-white'
-                      : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50'
+                      : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4] hover:bg-[#E8F5EF]/40'
                       }`}
                   >
                     {label}
@@ -269,7 +269,7 @@ export default function LogDataPage() {
                       onClick={() => setValue('flow', v)}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${form.flow === v
                         ? 'bg-[#EA9A98] text-white'
-                        : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A]'
+                        : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A] hover:border-[#EA9A98]/60 hover:bg-[#FFF0EF]'
                         }`}
                     >
                       {v}
@@ -371,7 +371,7 @@ export default function LogDataPage() {
                   onClick={() => toggleSymptom(symptom.id)}
                   className={`flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs transition-all ${selectedSymptoms.includes(symptom.id)
                     ? 'border-2 border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
-                    : 'border border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]'
+                    : 'border border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4] hover:bg-[#E8F5EF]/40'
                     }`}
                 >
                   {symptom.label}
@@ -396,7 +396,7 @@ export default function LogDataPage() {
                     onClick={() => setValue('mood', option.value)}
                     className={`flex flex-col items-center gap-0.5 p-1.5 rounded-lg transition-all flex-1 ${form.mood === option.value
                       ? 'bg-[#E8F5EF] border border-[#7EC8A4]'
-                      : 'border border-[#EEECF5] hover:border-[#7EC8A4]'
+                      : 'border border-[#EEECF5] hover:border-[#7EC8A4] hover:bg-[#E8F5EF]/30'
                       }`}
                   >
                     <span className="text-sm font-medium" style={{ color: option.color }}>

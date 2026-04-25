@@ -276,7 +276,7 @@ export default function RiskSimulatorPage() {
                     onClick={() => updateCurrentParam('sugarIntake', level)}
                     className={`flex-1 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${params.sugarIntake === level
                       ? 'bg-[#1E1B5E] text-white'
-                      : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A]'
+                      : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A] hover:border-[#1E1B5E]/40 hover:bg-[#F0EEF8]/50'
                       }`}
                   >
                     {level}
@@ -290,7 +290,7 @@ export default function RiskSimulatorPage() {
                     onClick={() => updateSimulatedParam('sugarIntake', level)}
                     className={`flex-1 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${simulatedParams.sugarIntake === level
                       ? 'bg-[#7EC8A4] text-white'
-                      : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A]'
+                      : 'bg-[#FAF8F5] border border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/60 hover:bg-[#E8F5EF]/40'
                       }`}
                   >
                     {level}

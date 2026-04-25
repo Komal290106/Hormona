@@ -74,6 +74,8 @@ export default function LandingPage() {
                   onClick={handleDemo}
                   className="font-semibold px-8 py-3 rounded-xl transition flex items-center gap-2 hover:bg-[#F0EFF8]"
                   style={{ border: '2px solid #1E1B5E', color: '#1E1B5E', backgroundColor: 'transparent' }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F0EFF8'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <Eye size={18} />
                   Watch Demo

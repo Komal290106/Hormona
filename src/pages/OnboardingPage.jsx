@@ -331,7 +331,7 @@ export default function OnboardingPage() {
                       <button key={v} type="button" onClick={() => set('typicalFlow', v)}
                         className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${form.typicalFlow === v
                           ? 'border-[#EA9A98] bg-[#FDECEA] text-[#1E1B5E]'
-                          : 'border-[#EEECF5] text-[#6B6B8A]'
+                          : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#EA9A98]/50 hover:bg-[#FFF0EF]'
                           }`}>
                         {v.charAt(0).toUpperCase() + v.slice(1)}
                       </button>
@@ -396,7 +396,7 @@ export default function OnboardingPage() {
                     <button key={opt.val} type="button" onClick={() => set('sleepQuality', opt.val)}
                       className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${form.sleepQuality === opt.val
                         ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
-                        : 'border-[#EEECF5] text-[#6B6B8A]'
+                        : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50 hover:bg-[#E8F5EF]/30'
                         }`}>
                       {opt.label}
                     </button>
@@ -447,7 +447,7 @@ export default function OnboardingPage() {
                       <button key={opt.val} type="button" onClick={() => set('exerciseFrequency', opt.val)}
                         className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${form.exerciseFrequency === opt.val
                           ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E] font-medium'
-                          : 'border-[#EEECF5] text-[#6B6B8A]'
+                          : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50 hover:bg-[#E8F5EF]/30'
                           }`}>
                         {opt.label}
                       </button>
@@ -468,7 +468,7 @@ export default function OnboardingPage() {
                       <button key={opt.val} type="button" onClick={() => set('sugarIntake', opt.val)}
                         className={`w-full py-1.5 px-3 rounded-lg border text-xs text-left transition-all ${form.sugarIntake === opt.val
                           ? 'border-[#EA9A98] bg-[#FDECEA] text-[#1E1B5E] font-medium'
-                          : 'border-[#EEECF5] text-[#6B6B8A]'
+                          : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#EA9A98]/50 hover:bg-[#FFF0EF]'
                           }`}>
                         {opt.label}
                       </button>
@@ -531,7 +531,7 @@ export default function OnboardingPage() {
                     <button key={m} type="button" onClick={() => set('recentMoodTrend', m.toLowerCase())}
                       className={`flex-1 py-2 rounded-xl border text-xs font-medium transition-all ${form.recentMoodTrend === m.toLowerCase()
                         ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
-                        : 'border-[#EEECF5] text-[#6B6B8A]'
+                        : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50 hover:bg-[#E8F5EF]/30'
                         }`}>
                       {m}
                     </button>
@@ -552,7 +552,7 @@ export default function OnboardingPage() {
                     <button key={opt.val} type="button" onClick={() => set('recentSleepTrend', opt.val)}
                       className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${form.recentSleepTrend === opt.val
                         ? 'border-[#7EC8A4] bg-[#E8F5EF] text-[#1E1B5E]'
-                        : 'border-[#EEECF5] text-[#6B6B8A]'
+                        : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#7EC8A4]/50 hover:bg-[#E8F5EF]/30'
                         }`}>
                       {opt.label}
                     </button>
@@ -573,7 +573,7 @@ export default function OnboardingPage() {
                     <button key={opt.val} type="button" onClick={() => set('recentStressTrend', opt.val)}
                       className={`flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all ${form.recentStressTrend === opt.val
                         ? 'border-[#EA9A98] bg-[#FDECEA] text-[#1E1B5E]'
-                        : 'border-[#EEECF5] text-[#6B6B8A]'
+                        : 'border-[#EEECF5] text-[#6B6B8A] hover:border-[#EA9A98]/50 hover:bg-[#FFF0EF]'
                         }`}>
                       {opt.label}
                     </button>

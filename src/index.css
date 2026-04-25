@@ -8,6 +8,19 @@
     margin: 0;
     padding: 0;
   }
+
+  button {
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  button:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  a {
+    cursor: pointer;
+  }
 }
 
 @keyframes fadeInUp {
