@@ -57,8 +57,11 @@ Collects cycle history, lifestyle habits, symptoms, and health goals to establis
 - Cycle statistics: average, shortest, longest cycle lengths
 - Positive pattern detection and personalised recommendations
 
+### Hormona AI
+An in-app AI chat assistant powered by Google Gemini. Ask questions about PCOD, symptoms, cycle health, nutrition, and lifestyle — and get compassionate, evidence-based responses contextualised to your own health data.
+
 ### Demo Mode
-A fully functional demo with a pre-seeded user profile ("Anaya") — no sign-up required. Judges can explore every feature immediately.
+A fully functional demo with a pre-seeded user profile ("Anaya") — no sign-up required. Explore every feature immediately without creating an account.
 
 ---
 
@@ -111,13 +114,14 @@ Computed from historical log gaps. Variance from the expected 28-day cycle is pe
 |---|---|
 | Frontend | React 19, Vite, TailwindCSS 4 |
 | Routing | React Router DOM 7 |
-| Charts & Visuals | Custom SVG / canvas, Recharts |
+| Charts & Visuals | Recharts |
 | Icons | Lucide React |
 | HTTP Client | Axios |
-| Backend | Supabase Edge Functions (Deno / TypeScript) |
-| Database | Supabase PostgreSQL |
-| Auth | Custom bcrypt hashing via `bcryptjs` |
-| Hosting | Supabase (functions + DB), Vite static build |
+| Backend | Node.js, Express 5 |
+| Database | MongoDB Atlas (Mongoose ODM) |
+| Auth | bcryptjs (password hashing) |
+| AI Chat | Google Gemini 1.5 Flash API |
+| Hosting | Vercel (frontend), Render (backend) |
 
 ---
 
@@ -131,29 +135,29 @@ Computed from historical log gaps. Variance from the expected 28-day cycle is pe
 │  LandingPage  →  Onboarding         │
 │  Dashboard    →  LogData            │
 │  Insights     →  RiskSimulator      │
+│  Hormona AI (floating chat)         │
 └──────────────┬──────────────────────┘
-               │ Axios (Bearer token)
+               │ Axios / fetch
                ▼
 ┌─────────────────────────────────────┐
-│    Supabase Edge Function (/api)    │
-│    Deno TypeScript runtime          │
+│    Express 5 REST API               │
+│    Node.js runtime                  │
 │                                     │
-│  POST /users          (register)    │
-│  POST /users/login    (auth)        │
-│  GET  /users/:id      (profile)     │
-│  GET  /logs/:userId   (history)     │
-│  POST /logs           (daily log)   │
-│  GET  /simulate/:id   (risk data)   │
+│  POST /api/users          (register)│
+│  POST /api/users/login    (auth)    │
+│  GET  /api/users/:id      (profile) │
+│  GET  /api/logs/:userId   (history) │
+│  POST /api/logs           (log)     │
+│  GET  /api/simulate/:id   (risk)    │
+│  POST /api/chat           (AI)      │
 └──────────────┬──────────────────────┘
-               │ Supabase JS client
+               │ Mongoose / Gemini API
                ▼
 ┌─────────────────────────────────────┐
-│    PostgreSQL (Supabase)            │
+│    MongoDB Atlas                    │
 │                                     │
 │  users       — profile + baseline   │
 │  daily_logs  — per-day entries      │
-│                                     │
-│  Row Level Security on all tables   │
 └─────────────────────────────────────┘
 ```
 
@@ -161,26 +165,54 @@ Computed from historical log gaps. Variance from the expected 28-day cycle is pe
 - **Demo-first:** full offline demo mode with a realistic pre-seeded user — zero friction for evaluators
 - **Client-side simulation:** risk recalculation runs entirely in the browser for instant feedback without round-trips
 - **Graceful degradation:** onboarding and dashboard fall back to localStorage if the API is unavailable
-- **RLS everywhere:** every table has Row Level Security enabled; users can only access their own data
-- **No generative AI:** all intelligence is algorithmic, transparent, and reproducible — by design
+- **Transparent algorithms:** all scoring is deterministic and documented — no black box AI for health scores
+- **Contextual AI:** Hormona AI receives the user's health profile alongside each message for personalised answers
 
 ---
 
 ## Local Setup
 
 ```bash
-# 1. Install dependencies
+# 1. Install frontend dependencies
 npm install
 
-# 2. Configure environment
-cp .env.example .env
-# Add your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+# 2. Install backend dependencies
+cd server && npm install && cd ..
 
-# 3. Run the dev server
+# 3. Configure environment — frontend
+# Create .env in project root:
+VITE_API_URL=http://localhost:5000/api
+
+# 4. Configure environment — backend
+# Create server/.env:
+MONGO_URI=your_mongodb_atlas_connection_string
+GEMINI_API_KEY=your_gemini_api_key
+PORT=5000
+CLIENT_URL=http://localhost:5173
+
+# 5. Start the backend
+cd server && npm run dev
+
+# 6. Start the frontend (in a separate terminal)
 npm run dev
 ```
 
-The Supabase Edge Function is deployed separately via the Supabase MCP toolchain.
+---
+
+## Deployment
+
+### Frontend — Vercel
+Set environment variable:
+- `VITE_API_URL` = your Render backend URL (e.g. `https://hormona-api.onrender.com/api`)
+
+### Backend — Render
+Set environment variables:
+- `MONGO_URI` = MongoDB Atlas connection string
+- `GEMINI_API_KEY` = Google Gemini API key
+- `CLIENT_URL` = your Vercel frontend URL
+- `PORT` = 5000 (or leave unset; Render sets this automatically)
+
+Set the start command to: `node index.js` from the `server/` directory.
 
 ---
 
@@ -189,7 +221,8 @@ The Supabase Edge Function is deployed separately via the Supabase MCP toolchain
 1. Open the app and click **Try Demo** on the landing page
 2. You are immediately logged in as Anaya — a pre-seeded user with 60 days of health history
 3. Explore the Dashboard, Insights, and Risk Simulator without creating an account
-4. To test with your own data, click **Sign Up** and complete the onboarding wizard
+4. Chat with **Hormona AI** for personalised PCOD guidance
+5. To test with your own data, click **Sign Up** and complete the onboarding wizard
 
 ---
 
