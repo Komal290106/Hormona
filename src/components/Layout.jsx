@@ -88,7 +88,10 @@ export default function Layout() {
         style={{ borderColor: 'rgba(255,255,255,0.1)' }}
         onClick={() => { navigate('/'); if (onLinkClick) onLinkClick() }}
       >
-        <img src={logo} alt="Hormona" className="h-10 w-auto" />
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="Hormona" className="h-10 w-auto" />
+          <span className="text-white font-bold text-xl tracking-tight">HORMONA</span>
+        </div>
       </div>
 
       {/* User card */}
