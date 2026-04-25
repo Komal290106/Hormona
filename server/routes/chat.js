@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const fetch = require('node-fetch');
 
 const SYSTEM_PROMPT = `You are a compassionate, knowledgeable PCOD (Polycystic Ovarian Disease) health assistant for the Hormona app. You help women understand and manage PCOD through evidence-based information.
 
@@ -65,13 +66,17 @@ router.post('/', async (req, res) => {
     );
 
     const data = await geminiRes.json();
+    console.log("Gemini raw response:", JSON.stringify(data, null, 2));
 
     if (!geminiRes.ok) {
       console.error('Gemini error:', data);
       return res.status(502).json({ error: 'Gemini API error', details: data });
     }
 
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+   const reply =
+  data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+  data?.candidates?.[0]?.content?.parts?.map(p => p.text).join(' ') ||
+  null;
     if (!reply) {
       return res.status(502).json({ error: 'No reply from Gemini' });
     }
