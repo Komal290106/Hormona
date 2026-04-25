@@ -10,7 +10,7 @@ import {
   X,
   Leaf,
 } from 'lucide-react'
-import logo from '../assets/logo.png'
+import logo from '../assets/logo1.png'
 import { useState, useEffect } from 'react'
 import ChatBot from './ChatBot'
 
@@ -89,7 +89,7 @@ export default function Layout() {
         onClick={() => { navigate('/'); if (onLinkClick) onLinkClick() }}
       >
         <div className="flex items-center gap-1">
-          <img src={logo} alt="Hormona" className="h-9 w-9 object-contain" />
+          <img src={logo} alt="Hormona" className="h-10 w-auto object-contain" />
           <span className="text-white font-bold text-xl tracking-tight">HORMONA</span>
         </div>
       </div>
