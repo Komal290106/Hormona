@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { MessageCircle, X, Send, Bot, User, Loader as Loader2, ChevronDown } from 'lucide-react'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+import api from '../lib/api'
 
 const SUGGESTED_QUESTIONS = [
   'What are the main symptoms of PCOD?',
@@ -58,16 +57,11 @@ export default function ChatBot() {
     setLoading(true)
 
     try {
-      const res = await fetch(`${API_URL}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: newMessages,
-          userContext: getUserContext(),
-        }),
+      const { data } = await api.post('/chat', {
+        messages: newMessages,
+        userContext: getUserContext(),
       })
 
-      const data = await res.json()
       if (data.reply) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
       } else {
