@@ -6,24 +6,25 @@ const cors = require('cors');
 const app = express();
 
 // ── Middleware ────────────────────────────────────────────────────────────
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:4173',
-  ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
-];
+// const allowedOrigins = [
+//   'http://localhost:5173',
+//   'http://localhost:4173',
+//   ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
+// ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (server-to-server, curl, Postman)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS: origin ${origin} not allowed`));
-    }
-  },
-  credentials: true,
-}));
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     // Allow requests with no origin (server-to-server, curl, Postman)
+//     if (!origin) return callback(null, true);
+//     if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error(`CORS: origin ${origin} not allowed`));
+//     }
+//   },
+//   credentials: true,
+// }));
+app.use(cors());
 app.use(express.json());
 
 // ── Routes ────────────────────────────────────────────────────────────────
