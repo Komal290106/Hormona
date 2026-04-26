@@ -9,6 +9,7 @@ import LogDataPage from './pages/LogDataPage'
 import RiskSimulatorPage from './pages/RiskSimulatorPage'
 import InsightsPage from './pages/InsightsPage'
 import ProfilePage from './pages/ProfilePage'
+import LearnPage from './pages/LearnPage'
 
 // Requires userId in localStorage (real user or demo user)
 function RequireAuth({ children }) {
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/simulate" element={<RiskSimulatorPage />} />
           <Route path="/insights" element={<InsightsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/learn" element={<LearnPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

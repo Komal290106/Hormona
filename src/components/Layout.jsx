@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   Leaf,
+  BookOpen,
 } from 'lucide-react'
 import logo from '../assets/logo1.png'
 import { useState, useEffect } from 'react'
@@ -19,6 +20,7 @@ const navItems = [
   { to: '/log', label: 'Log Data', icon: ClipboardList },
   { to: '/insights', label: 'Insights', icon: Lightbulb },
   { to: '/simulate', label: 'Simulate', icon: Brain },
+  { to: '/learn', label: 'Learn', icon: BookOpen },
   { to: '/profile', label: 'Profile', icon: User },
 ]
 
