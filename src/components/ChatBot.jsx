@@ -118,7 +118,7 @@ export default function ChatBot() {
             </div>
             <div>
               <p className="text-white text-sm font-semibold leading-none">Hormona AI</p>
-              <p className="text-xs mt-0.5" style={{ color: '#7EC8A4' }}>Powered by Gemini AI</p>
+              <p className="text-xs mt-0.5" style={{ color: '#7EC8A4' }}>Powered by GROQ AI</p>
             </div>
           </div>
           <button
