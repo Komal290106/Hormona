@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Clock, BookOpen } from 'lucide-react'
 import { getArticleBySlug } from '../data/articles'
@@ -66,6 +67,10 @@ export default function ArticlePage() {
   const { slug } = useParams()
   const navigate = useNavigate()
   const article = getArticleBySlug(slug)
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [slug])
 
   if (!article) {
     return (
