@@ -1,58 +1,7 @@
 import { useState } from 'react'
-import { BookOpen, ArrowRight } from 'lucide-react'
-
-const articles = [
-  {
-    category: 'Basics',
-    title: 'What is PCOD?',
-    description: 'PCOD is a hormonal condition where the ovaries produce excess androgens, affecting menstrual cycles and overall health.',
-  },
-  {
-    category: 'Basics',
-    title: 'PCOD vs PCOS',
-    description: 'PCOD is common and manageable, while PCOS is more severe and involves metabolic complications.',
-  },
-  {
-    category: 'Symptoms',
-    title: 'Common Symptoms',
-    description: 'Irregular periods, acne, weight gain, and hair thinning are common indicators of PCOD.',
-  },
-  {
-    category: 'Symptoms',
-    title: 'Early Warning Signs',
-    description: 'Delayed cycles, fatigue, and hormonal acne can be early signals that should not be ignored.',
-  },
-  {
-    category: 'Lifestyle',
-    title: 'Sleep & Hormones',
-    description: 'Poor sleep disrupts hormonal balance and can worsen PCOD symptoms over time.',
-  },
-  {
-    category: 'Lifestyle',
-    title: 'Stress Impact',
-    description: 'Chronic stress increases cortisol, which negatively affects reproductive hormones.',
-  },
-  {
-    category: 'Lifestyle',
-    title: 'Exercise Benefits',
-    description: 'Regular moderate exercise improves insulin sensitivity and helps regulate hormonal cycles.',
-  },
-  {
-    category: 'Diet',
-    title: 'Best Diet for PCOD',
-    description: 'A low-glycemic, high-fiber diet helps regulate insulin and improve symptoms.',
-  },
-  {
-    category: 'Diet',
-    title: 'Foods to Avoid',
-    description: 'Processed sugars and refined carbs can increase insulin resistance and worsen PCOD.',
-  },
-  {
-    category: 'Diet',
-    title: 'Preventive Habits',
-    description: 'Consistent meal timing, hydration, and avoiding crash diets support long-term hormonal health.',
-  },
-]
+import { BookOpen, ArrowRight, Clock } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { articles } from '../data/articles'
 
 const CATEGORY_COLORS = {
   Basics:    { tag: '#E8F5EE', text: '#2E7D5A', border: '#C8E8D8' },
@@ -65,6 +14,7 @@ const FILTERS = ['All', 'Basics', 'Symptoms', 'Lifestyle', 'Diet']
 
 export default function LearnPage() {
   const [active, setActive] = useState('All')
+  const navigate = useNavigate()
 
   const visible = active === 'All' ? articles : articles.filter(a => a.category === active)
 
@@ -113,13 +63,14 @@ export default function LearnPage() {
 
       {/* Cards grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {visible.map((article, i) => {
+        {visible.map((article) => {
           const colors = CATEGORY_COLORS[article.category]
           return (
             <div
-              key={i}
-              className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col"
+              key={article.slug}
+              className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col cursor-pointer"
               style={{ border: '1px solid #EEECF5' }}
+              onClick={() => navigate(`/learn/${article.slug}`)}
             >
               {/* Category tag */}
               <span
@@ -143,12 +94,16 @@ export default function LearnPage() {
                 {article.description}
               </p>
 
-              {/* Read more */}
-              <div className="mt-4 flex items-center gap-1">
-                <span className="text-xs font-semibold" style={{ color: '#7EC8A4' }}>
-                  Read more
+              {/* Footer */}
+              <div className="mt-4 flex items-center justify-between">
+                <span className="flex items-center gap-1 text-xs" style={{ color: '#9B9BB5' }}>
+                  <Clock size={11} />
+                  {article.readTime}
                 </span>
-                <ArrowRight size={12} style={{ color: '#7EC8A4' }} />
+                <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: '#7EC8A4' }}>
+                  Read more
+                  <ArrowRight size={12} />
+                </span>
               </div>
             </div>
           )

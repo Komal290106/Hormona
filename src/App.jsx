@@ -10,6 +10,7 @@ import RiskSimulatorPage from './pages/RiskSimulatorPage'
 import InsightsPage from './pages/InsightsPage'
 import ProfilePage from './pages/ProfilePage'
 import LearnPage from './pages/LearnPage'
+import ArticlePage from './pages/ArticlePage'
 
 // Requires userId in localStorage (real user or demo user)
 function RequireAuth({ children }) {
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/insights" element={<InsightsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/learn" element={<LearnPage />} />
+          <Route path="/learn/:slug" element={<ArticlePage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
