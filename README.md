@@ -2,6 +2,8 @@
 
 > A hormonal health intelligence platform that connects daily lifestyle habits to cycle health and PCOD risk, giving women the tools to understand, prevent, and act — before symptoms become diagnoses.
 
+<img width="528" height="352" alt="Picture1" src="https://github.com/user-attachments/assets/638b2cd4-a9c9-4faa-92e8-855fd1bdb790" />
+
 ---
 
 ## The Problem
