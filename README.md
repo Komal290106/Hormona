@@ -1,4 +1,4 @@
-# HORMONA — Predictive Health. Preventing Risk.
+# HORMONA 
 
 > A hormonal health intelligence platform that connects daily lifestyle habits to cycle health and PCOD risk, giving women the tools to understand, prevent, and act — before symptoms become diagnoses.
 
@@ -122,7 +122,7 @@ Computed from historical log gaps. Variance from the expected 28-day cycle is pe
 | Backend | Node.js, Express 5 |
 | Database | MongoDB Atlas (Mongoose ODM) |
 | Auth | bcryptjs (password hashing) |
-| AI Chat | Google Gemini 1.5 Flash API |
+| AI Chat | Groq API |
 | Hosting | Vercel (frontend), Render (backend) |
 
 ---
