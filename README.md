@@ -60,7 +60,7 @@ Collects cycle history, lifestyle habits, symptoms, and health goals to establis
 - Positive pattern detection and personalised recommendations
 
 ### Hormona AI
-An in-app AI chat assistant powered by Google Gemini. Ask questions about PCOD, symptoms, cycle health, nutrition, and lifestyle — and get compassionate, evidence-based responses contextualised to your own health data.
+An in-app AI chat assistant powered by Groq API. Ask questions about PCOD, symptoms, cycle health, nutrition, and lifestyle — and get compassionate, evidence-based responses contextualised to your own health data.
 
 ### Demo Mode
 A fully functional demo with a pre-seeded user profile ("Anaya") — no sign-up required. Explore every feature immediately without creating an account.
